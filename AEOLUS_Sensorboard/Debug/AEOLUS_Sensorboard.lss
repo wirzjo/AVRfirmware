@@ -3,23 +3,23 @@ AEOLUS_Sensorboard.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .text         00000108  00000000  00000000  00000054  2**1
+  0 .text         00000146  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  1 .stab         000006cc  00000000  00000000  0000015c  2**2
+  1 .stab         000006cc  00000000  00000000  0000019c  2**2
                   CONTENTS, READONLY, DEBUGGING
-  2 .stabstr      00000085  00000000  00000000  00000828  2**0
+  2 .stabstr      00000085  00000000  00000000  00000868  2**0
                   CONTENTS, READONLY, DEBUGGING
-  3 .debug_aranges 000000a0  00000000  00000000  000008b0  2**3
+  3 .debug_aranges 000000c0  00000000  00000000  000008f0  2**3
                   CONTENTS, READONLY, DEBUGGING
-  4 .debug_info   000005bb  00000000  00000000  00000950  2**0
+  4 .debug_info   000005c4  00000000  00000000  000009b0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_abbrev 000001a3  00000000  00000000  00000f0b  2**0
+  5 .debug_abbrev 000001ee  00000000  00000000  00000f74  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_line   0000041a  00000000  00000000  000010ae  2**0
+  6 .debug_line   00000500  00000000  00000000  00001162  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_frame  00000058  00000000  00000000  000014c8  2**2
+  7 .debug_frame  0000007c  00000000  00000000  00001664  2**2
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_str    00000150  00000000  00000000  00001520  2**0
+  8 .debug_str    00000168  00000000  00000000  000016e0  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -64,7 +64,7 @@ Disassembly of section .text:
   40:	11 e0       	ldi	r17, 0x01	; 1
   42:	a0 e0       	ldi	r26, 0x00	; 0
   44:	b1 e0       	ldi	r27, 0x01	; 1
-  46:	e8 e0       	ldi	r30, 0x08	; 8
+  46:	e6 e4       	ldi	r30, 0x46	; 70
   48:	f1 e0       	ldi	r31, 0x01	; 1
   4a:	02 c0       	rjmp	.+4      	; 0x50 <__do_copy_data+0x10>
   4c:	05 90       	lpm	r0, Z+
@@ -87,7 +87,7 @@ Disassembly of section .text:
   62:	b1 07       	cpc	r27, r17
   64:	e1 f7       	brne	.-8      	; 0x5e <.do_clear_bss_loop>
   66:	02 d0       	rcall	.+4      	; 0x6c <main>
-  68:	4d c0       	rjmp	.+154    	; 0x104 <_exit>
+  68:	6c c0       	rjmp	.+216    	; 0x142 <_exit>
 
 0000006a <__bad_interrupt>:
   6a:	ca cf       	rjmp	.-108    	; 0x0 <__vectors>
@@ -99,130 +99,191 @@ Disassembly of section .text:
 	
 	//Init the input/output ports 
 	port_init(); 
-  6c:	3d d0       	rcall	.+122    	; 0xe8 <port_init>
+  6c:	40 d0       	rcall	.+128    	; 0xee <port_init>
+	
+	//Init the use of a Servo
+	servo_init(); 
+  6e:	4d d0       	rcall	.+154    	; 0x10a <servo_init>
+    while(1)
+    {
+		
+		//Hello World Application 
+		port_led(true);
+		OCR1A = ICR1 -550;
+  70:	c6 e8       	ldi	r28, 0x86	; 134
+  72:	d0 e0       	ldi	r29, 0x00	; 0
+  74:	08 e8       	ldi	r16, 0x88	; 136
+  76:	10 e0       	ldi	r17, 0x00	; 0
 	/************************************************************************/
     while(1)
     {
 		
 		//Hello World Application 
 		port_led(true);
-  6e:	81 e0       	ldi	r24, 0x01	; 1
-  70:	90 e0       	ldi	r25, 0x00	; 0
-  72:	42 d0       	rcall	.+132    	; 0xf8 <port_led>
+  78:	81 e0       	ldi	r24, 0x01	; 1
+  7a:	90 e0       	ldi	r25, 0x00	; 0
+  7c:	40 d0       	rcall	.+128    	; 0xfe <port_led>
+		OCR1A = ICR1 -550;
+  7e:	88 81       	ld	r24, Y
+  80:	99 81       	ldd	r25, Y+1	; 0x01
+  82:	86 52       	subi	r24, 0x26	; 38
+  84:	92 40       	sbci	r25, 0x02	; 2
+  86:	d8 01       	movw	r26, r16
+  88:	11 96       	adiw	r26, 0x01	; 1
+  8a:	9c 93       	st	X, r25
+  8c:	8e 93       	st	-X, r24
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  74:	8f e3       	ldi	r24, 0x3F	; 63
-  76:	9d e0       	ldi	r25, 0x0D	; 13
-  78:	a3 e0       	ldi	r26, 0x03	; 3
-  7a:	81 50       	subi	r24, 0x01	; 1
-  7c:	90 40       	sbci	r25, 0x00	; 0
-  7e:	a0 40       	sbci	r26, 0x00	; 0
-  80:	e1 f7       	brne	.-8      	; 0x7a <main+0xe>
-  82:	00 c0       	rjmp	.+0      	; 0x84 <main+0x18>
-  84:	00 00       	nop
-  86:	8f e3       	ldi	r24, 0x3F	; 63
-  88:	9d e0       	ldi	r25, 0x0D	; 13
-  8a:	a3 e0       	ldi	r26, 0x03	; 3
-  8c:	81 50       	subi	r24, 0x01	; 1
-  8e:	90 40       	sbci	r25, 0x00	; 0
-  90:	a0 40       	sbci	r26, 0x00	; 0
-  92:	e1 f7       	brne	.-8      	; 0x8c <main+0x20>
-  94:	00 c0       	rjmp	.+0      	; 0x96 <main+0x2a>
-  96:	00 00       	nop
-  98:	8f e3       	ldi	r24, 0x3F	; 63
-  9a:	9d e0       	ldi	r25, 0x0D	; 13
-  9c:	a3 e0       	ldi	r26, 0x03	; 3
-  9e:	81 50       	subi	r24, 0x01	; 1
-  a0:	90 40       	sbci	r25, 0x00	; 0
-  a2:	a0 40       	sbci	r26, 0x00	; 0
-  a4:	e1 f7       	brne	.-8      	; 0x9e <main+0x32>
-  a6:	00 c0       	rjmp	.+0      	; 0xa8 <main+0x3c>
-  a8:	00 00       	nop
+  8e:	8f e3       	ldi	r24, 0x3F	; 63
+  90:	9d e0       	ldi	r25, 0x0D	; 13
+  92:	a3 e0       	ldi	r26, 0x03	; 3
+  94:	81 50       	subi	r24, 0x01	; 1
+  96:	90 40       	sbci	r25, 0x00	; 0
+  98:	a0 40       	sbci	r26, 0x00	; 0
+  9a:	e1 f7       	brne	.-8      	; 0x94 <main+0x28>
+  9c:	00 c0       	rjmp	.+0      	; 0x9e <main+0x32>
+  9e:	00 00       	nop
+  a0:	8f e3       	ldi	r24, 0x3F	; 63
+  a2:	9d e0       	ldi	r25, 0x0D	; 13
+  a4:	a3 e0       	ldi	r26, 0x03	; 3
+  a6:	81 50       	subi	r24, 0x01	; 1
+  a8:	90 40       	sbci	r25, 0x00	; 0
+  aa:	a0 40       	sbci	r26, 0x00	; 0
+  ac:	e1 f7       	brne	.-8      	; 0xa6 <main+0x3a>
+  ae:	00 c0       	rjmp	.+0      	; 0xb0 <main+0x44>
+  b0:	00 00       	nop
 		_delay_ms(1000);
 		_delay_ms(1000);
-		_delay_ms(1000); 
-		port_led(false); 
-  aa:	80 e0       	ldi	r24, 0x00	; 0
-  ac:	90 e0       	ldi	r25, 0x00	; 0
-  ae:	24 d0       	rcall	.+72     	; 0xf8 <port_led>
-  b0:	8f e3       	ldi	r24, 0x3F	; 63
-  b2:	9d e0       	ldi	r25, 0x0D	; 13
-  b4:	a3 e0       	ldi	r26, 0x03	; 3
-  b6:	81 50       	subi	r24, 0x01	; 1
-  b8:	90 40       	sbci	r25, 0x00	; 0
-  ba:	a0 40       	sbci	r26, 0x00	; 0
-  bc:	e1 f7       	brne	.-8      	; 0xb6 <main+0x4a>
-  be:	00 c0       	rjmp	.+0      	; 0xc0 <main+0x54>
-  c0:	00 00       	nop
-  c2:	8f e3       	ldi	r24, 0x3F	; 63
-  c4:	9d e0       	ldi	r25, 0x0D	; 13
-  c6:	a3 e0       	ldi	r26, 0x03	; 3
-  c8:	81 50       	subi	r24, 0x01	; 1
-  ca:	90 40       	sbci	r25, 0x00	; 0
-  cc:	a0 40       	sbci	r26, 0x00	; 0
-  ce:	e1 f7       	brne	.-8      	; 0xc8 <main+0x5c>
-  d0:	00 c0       	rjmp	.+0      	; 0xd2 <main+0x66>
-  d2:	00 00       	nop
-  d4:	8f e3       	ldi	r24, 0x3F	; 63
-  d6:	9d e0       	ldi	r25, 0x0D	; 13
-  d8:	a3 e0       	ldi	r26, 0x03	; 3
-  da:	81 50       	subi	r24, 0x01	; 1
-  dc:	90 40       	sbci	r25, 0x00	; 0
-  de:	a0 40       	sbci	r26, 0x00	; 0
-  e0:	e1 f7       	brne	.-8      	; 0xda <main+0x6e>
-  e2:	00 c0       	rjmp	.+0      	; 0xe4 <main+0x78>
-  e4:	00 00       	nop
-  e6:	c3 cf       	rjmp	.-122    	; 0x6e <main+0x2>
+		port_led(false);
+  b2:	80 e0       	ldi	r24, 0x00	; 0
+  b4:	90 e0       	ldi	r25, 0x00	; 0
+  b6:	23 d0       	rcall	.+70     	; 0xfe <port_led>
+		OCR1A = ICR1 - 2350; 
+  b8:	88 81       	ld	r24, Y
+  ba:	99 81       	ldd	r25, Y+1	; 0x01
+  bc:	8e 52       	subi	r24, 0x2E	; 46
+  be:	99 40       	sbci	r25, 0x09	; 9
+  c0:	d8 01       	movw	r26, r16
+  c2:	11 96       	adiw	r26, 0x01	; 1
+  c4:	9c 93       	st	X, r25
+  c6:	8e 93       	st	-X, r24
+  c8:	8f e3       	ldi	r24, 0x3F	; 63
+  ca:	9d e0       	ldi	r25, 0x0D	; 13
+  cc:	a3 e0       	ldi	r26, 0x03	; 3
+  ce:	81 50       	subi	r24, 0x01	; 1
+  d0:	90 40       	sbci	r25, 0x00	; 0
+  d2:	a0 40       	sbci	r26, 0x00	; 0
+  d4:	e1 f7       	brne	.-8      	; 0xce <main+0x62>
+  d6:	00 c0       	rjmp	.+0      	; 0xd8 <main+0x6c>
+  d8:	00 00       	nop
+  da:	8f e3       	ldi	r24, 0x3F	; 63
+  dc:	9d e0       	ldi	r25, 0x0D	; 13
+  de:	a3 e0       	ldi	r26, 0x03	; 3
+  e0:	81 50       	subi	r24, 0x01	; 1
+  e2:	90 40       	sbci	r25, 0x00	; 0
+  e4:	a0 40       	sbci	r26, 0x00	; 0
+  e6:	e1 f7       	brne	.-8      	; 0xe0 <main+0x74>
+  e8:	00 c0       	rjmp	.+0      	; 0xea <main+0x7e>
+  ea:	00 00       	nop
+  ec:	c5 cf       	rjmp	.-118    	; 0x78 <main+0xc>
 
-000000e8 <port_init>:
+000000ee <port_init>:
  *
  */
 void port_init(void) {
 	
 	//Set data direction (Output/Input) 
 	DDRB = 0xff;	//All ports are outputs
-  e8:	8f ef       	ldi	r24, 0xFF	; 255
-  ea:	84 b9       	out	0x04, r24	; 4
+  ee:	8f ef       	ldi	r24, 0xFF	; 255
+  f0:	84 b9       	out	0x04, r24	; 4
 	DDRC = 0xff;    //All ports are outputs
-  ec:	87 b9       	out	0x07, r24	; 7
+  f2:	87 b9       	out	0x07, r24	; 7
 	DDRD = 0xff;    //All ports are outputs 
-  ee:	8a b9       	out	0x0a, r24	; 10
+  f4:	8a b9       	out	0x0a, r24	; 10
 	
 	//Set all Ports to logic zero (<=> OFF) 
 	PORTB = 0x00; 
-  f0:	15 b8       	out	0x05, r1	; 5
+  f6:	15 b8       	out	0x05, r1	; 5
 	PORTC = 0x00; 
-  f2:	18 b8       	out	0x08, r1	; 8
+  f8:	18 b8       	out	0x08, r1	; 8
 	PORTD = 0x00; 
-  f4:	1b b8       	out	0x0b, r1	; 11
+  fa:	1b b8       	out	0x0b, r1	; 11
 	
 	
 } 
-  f6:	08 95       	ret
+  fc:	08 95       	ret
 
-000000f8 <port_led>:
+000000fe <port_led>:
  * Control the LED connected to PORT PB0
  *
  * @param state, true, iff the LED must be turned on, false else  
  */
 void port_led(bool state) {
 	if(state) {
-  f8:	88 23       	and	r24, r24
-  fa:	11 f0       	breq	.+4      	; 0x100 <port_led+0x8>
+  fe:	88 23       	and	r24, r24
+ 100:	11 f0       	breq	.+4      	; 0x106 <port_led+0x8>
 		PORTB |= (1<<PB0); 
-  fc:	28 9a       	sbi	0x05, 0	; 5
-  fe:	08 95       	ret
+ 102:	28 9a       	sbi	0x05, 0	; 5
+ 104:	08 95       	ret
 	} else {
 		PORTB &= ~(1<<PB0); 
- 100:	28 98       	cbi	0x05, 0	; 5
- 102:	08 95       	ret
+ 106:	28 98       	cbi	0x05, 0	; 5
+ 108:	08 95       	ret
 
-00000104 <_exit>:
- 104:	f8 94       	cli
+0000010a <servo_init>:
+	ICR1  = 20000;
+	TCCR1A = (1<<COM1A1);
+	TCCR1A = (1<<COM1A0);*/
+	
+	
+	DDRD |= 0xFF;
+ 10a:	8a b1       	in	r24, 0x0a	; 10
+ 10c:	8f ef       	ldi	r24, 0xFF	; 255
+ 10e:	8a b9       	out	0x0a, r24	; 10
+	//TCCR1A |= 1<<WGM11 | 1<<COM1A1 | 1<<COM1A0;
+	TCCR1A |= (1<<WGM11) | (1<<COM1A1); 
+ 110:	e0 e8       	ldi	r30, 0x80	; 128
+ 112:	f0 e0       	ldi	r31, 0x00	; 0
+ 114:	80 81       	ld	r24, Z
+ 116:	82 68       	ori	r24, 0x82	; 130
+ 118:	80 83       	st	Z, r24
+	TCCR1B |= 1<<WGM13 | 1<<WGM12 | 1<<CS10;
+ 11a:	e1 e8       	ldi	r30, 0x81	; 129
+ 11c:	f0 e0       	ldi	r31, 0x00	; 0
+ 11e:	80 81       	ld	r24, Z
+ 120:	89 61       	ori	r24, 0x19	; 25
+ 122:	80 83       	st	Z, r24
+	
+	//Set maximum Timer-Count 
+	// ICR1 = F_CPU/(Servo acceptable Value in Hz); 
+	
+	ICR1 = 15999; 
+ 124:	e6 e8       	ldi	r30, 0x86	; 134
+ 126:	f0 e0       	ldi	r31, 0x00	; 0
+ 128:	8f e7       	ldi	r24, 0x7F	; 127
+ 12a:	9e e3       	ldi	r25, 0x3E	; 62
+ 12c:	91 83       	std	Z+1, r25	; 0x01
+ 12e:	80 83       	st	Z, r24
+	//ICR1 = 19999;
 
-00000106 <__stop_program>:
- 106:	ff cf       	rjmp	.-2      	; 0x106 <__stop_program>
+	OCR1A = ICR1 - 2000; //18000
+ 130:	80 81       	ld	r24, Z
+ 132:	91 81       	ldd	r25, Z+1	; 0x01
+ 134:	80 5d       	subi	r24, 0xD0	; 208
+ 136:	97 40       	sbci	r25, 0x07	; 7
+ 138:	90 93 89 00 	sts	0x0089, r25
+ 13c:	80 93 88 00 	sts	0x0088, r24
+	
+	
+	
+ 140:	08 95       	ret
+
+00000142 <_exit>:
+ 142:	f8 94       	cli
+
+00000144 <__stop_program>:
+ 144:	ff cf       	rjmp	.-2      	; 0x144 <__stop_program>

@@ -14,6 +14,7 @@
 #include <stdbool.h>
 
 #include "port.h"
+#include "servo.h"
 
 int main(void)
 {
@@ -25,6 +26,9 @@ int main(void)
 	//Init the input/output ports 
 	port_init(); 
 	
+	//Init the use of a Servo
+	servo_init(); 
+	
 	
 	
 	/************************************************************************/
@@ -35,15 +39,13 @@ int main(void)
 		
 		//Hello World Application 
 		port_led(true);
+		OCR1A = ICR1 -550;
 		_delay_ms(1000);
 		_delay_ms(1000);
+		port_led(false);
+		OCR1A = ICR1 - 2350; 
 		_delay_ms(1000); 
-		port_led(false); 
-		_delay_ms(1000); 
-		_delay_ms(1000);
-		_delay_ms(1000);
-		
-		
+		_delay_ms(1000);	
 		
     }
 }
