@@ -12,32 +12,37 @@
 #include "servo.h"
 #include <avr/io.h>
 
+#define minPWM 550		//most left position, say 0°
+#define maxPWM 2350     //most right position, say 180°
+
 
 /** 
  * Initialize the use of a Servo 	
  */
 void servo_init(void) {
 	
-	/*TCCR1B = 0x00;
-	TCCR1B = (1<<CS10) | (1<<WGM13); //Stellt den Prescaler ein
-	ICR1  = 20000;
-	TCCR1A = (1<<COM1A1);
-	TCCR1A = (1<<COM1A0);*/
 	
 	
-	DDRD |= 0xFF;
-	//TCCR1A |= 1<<WGM11 | 1<<COM1A1 | 1<<COM1A0;
-	TCCR1A |= (1<<WGM11) | (1<<COM1A1); 
+	DDRD |= 0xFF;		//Set DDRD as output 
+	TCCR1A |= (1<<WGM11) | (1<<COM1A1);		
 	TCCR1B |= 1<<WGM13 | 1<<WGM12 | 1<<CS10;
 	
 	//Set maximum Timer-Count 
 	// ICR1 = F_CPU/(Servo acceptable Value in Hz); 
-	
 	ICR1 = 15999; 
-	//ICR1 = 19999;
 
-	OCR1A = ICR1 - 2000; //18000
+	//Init the Servo and make sure it starts in 90° Position. 
+	servo_set(90); 
 	
-	
-	
+}
+
+
+
+/**
+ * Set the Servo to a given angle
+ * 
+ * @param deg: angele in degrees the servo should move to 
+ */
+void servo_set(float deg) {
+	OCR1A = ICR1 - ((maxPWM-minPWM)/180.0f*deg + minPWM); 
 }

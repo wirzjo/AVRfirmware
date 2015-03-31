@@ -36,15 +36,20 @@ int main(void)
 	/************************************************************************/
     while(1)
     {
-		
-		//Hello World Application 
+		//Toggle LED  
 		port_led(true);
-		OCR1A = ICR1 -550;
-		_delay_ms(1000);
-		_delay_ms(1000);
+		
+		//Move Servo from 0 to 180° in Steps of 5°
+		uint8_t ang = 0; 
+		for(ang = 0; ang <= 180; ang = ang+2) {
+		servo_set(ang); 
+		_delay_ms(50); 
+		}		
+
+		//Toggle LED 
 		port_led(false);
-		OCR1A = ICR1 - 2350; 
 		_delay_ms(1000); 
+		servo_set(0); 
 		_delay_ms(1000);	
 		
     }

@@ -14,6 +14,9 @@
 void servo_init(void);
 
 
+/* @brief Set the servo to a given angle in Degrees */
+void servo_set(float deg); 
+
 
 
 #endif /* SERVO_H_ */
