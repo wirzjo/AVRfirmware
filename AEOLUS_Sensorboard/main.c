@@ -9,6 +9,15 @@
  */ 
 
 
+/* TODO: 
+ * 
+ *	- Add Watchdog
+ *  - Add Sleep-Mode
+ *  - Add I2C Protocoll
+ *  - Add proper scheduling 
+ */
+
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <stdbool.h>
