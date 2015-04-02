@@ -4,6 +4,16 @@
  * This file implements the communication with the Pixhawk. It specifies a protocol, 
  * such that this hardware could be easily replaced by an other sensor (for example a camera). 
  *
+ * Further, it acts as the interface between the Pixhawk and the LIDAR Sensor 
+ *
+ * The protocol is as follows: 
+ * 1) Read request from Pixhawk: 
+ *    0x02 | 0x02 | Command-Byte | 0x03
+ * 2) Answer to read request 
+ *    0x02 | 0x02 | Command-Byte | ...variable length of data bytes dependent on the command... | 0x03
+ *
+ *
+ *
  * Created: 02.04.2015 11:56:17
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
@@ -13,19 +23,41 @@
 
 #include "config.h"
 #include "pixhawk.h"
+#include "serial.h"
 
 
 /************************************************************************/
 /* V A R I A B L E S                                                    */
 /************************************************************************/
 
-typedef enum{IDLE,STARTCHAR, COMMAND, ENDCHAR, COMPLETE, ERROR} state_enum;
-static state_enum rx_state = IDLE; 
-	
-#define MSG_START 0x02	//Start character for a message 
-#define MSG_END   0x03  //End character for a message 
+typedef enum{IDLE,STARTCHAR, COMMAND, ENDCHAR, COMPLETE, ERROR} state_enum;	
+static state_enum rx_state = IDLE;  //State for the receive-finite state machine
 
-static uint8_t cmd = MSG_START;		//Last Command transmitted by the message
+static uint8_t cmd = 0x00;			//Last Command transmitted by the message
+
+#define MAXNROFOBSTACLES 10			//Maximum number of obstacles that can be detected and reported to Pixhawk 
+
+
+static struct {
+	uint8_t numofobstacles;			//Current number of obstacles known 
+	obstacle obstacles[MAXNROFOBSTACLES]; //Obstacles represented as Obstacle-Objects 
+} state = {
+	.numofobstacles = 0
+};
+
+
+
+
+/************************************************************************/
+/* P R O T O C O L L                                                    */
+/************************************************************************/
+
+#define MSG_START		0x02	//Start character for a message
+#define MSG_END			0x03	//End character for a message
+
+#define CMD_OBSTACLES	0x4F	//Send the bearings and distances to every obstacle in range
+								//Note: bearing (high/low byte) and then the distance is sent
+#define CMD_NUMOBSTACLES 0x4E   //Number of obstacles currently in range 	
 
 
 
@@ -71,6 +103,8 @@ bool pixhawk_parse(uint8_t data) {
 	
 	switch(rx_state) {
 		case IDLE: {
+			//The state machine is idle and waits for chars to be sent 
+			
 			if(data == MSG_START) {
 				//We received the first Start-Character
 				
@@ -78,6 +112,8 @@ bool pixhawk_parse(uint8_t data) {
 			}
 		}
 		case STARTCHAR: {
+			//The first Start-Character was sent and we are waiting for the second one now 
+			
 			if(data == MSG_START) {
 				//We received the second Start-Character
 				
@@ -91,6 +127,8 @@ bool pixhawk_parse(uint8_t data) {
 			
 		}
 		case COMMAND: {
+			//The second Start-Character was sent, now we expect to receive the Command 
+			
 			if(data == MSG_START || data == MSG_END) {
 				//We received again a Start or End Character or a 0 => ERROR 
 				//return to IDLE
@@ -105,6 +143,8 @@ bool pixhawk_parse(uint8_t data) {
 			}
 		}
 		case ENDCHAR: {
+			//The command byte was read and we wait for the end-byte 
+			
 			if(data == MSG_END) {
 				//We received the End Character => Data is valid 
 				
@@ -147,10 +187,25 @@ bool pixhawk_parse(uint8_t data) {
  */
 bool send2pixhawk(uint8_t cmd) {
 	
+	//Send start-sequence 
+	serial_send_byte(MSG_START);
+	
+	//Send Command number 
+	serial_send_byte(cmd); 
+	
+	//Send individual data 
 	switch(cmd) {
-		case 0x00: {
-			//TODO: 0x00 is invalid, replace by true character 
-			
+		case CMD_OBSTACLES: {
+			uint8_t i; 
+			for(i = 0; i<state.numofobstacles; i++) {
+				//serial_send_byte((uint8_t)(state.obstacles[i].bearing>>8));  //High byte of bearing
+				//serial_send_byte((uint8_t)(state.obstacles[i]&0x00FF));		 //Low byte of bearing
+				//serial_send_byte((uint8_t)(state.obstacles[i].distance>>8)); //High byte of distance 
+				//serial_send_byte((uint8_t)(state.obstacles[i]&0x00FF));		 //Low byte of distance 
+			}
+		}
+		case CMD_NUMOBSTACLES: {
+			serial_send_byte(state.numofobstacles);
 		}
 		default: {
 			//An invalid command was sent => might flag unhappy...
@@ -158,6 +213,9 @@ bool send2pixhawk(uint8_t cmd) {
 			return false; 
 		}
 	}
+	
+	//Send end of Message 
+	serial_send_byte(MSG_END);
 	
 }
 

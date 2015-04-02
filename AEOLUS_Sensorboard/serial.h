@@ -12,6 +12,7 @@
 /* @brief Initialize the use of the serial communication */ 
 bool serial_init(unsigned int baud); 
 
-
+/* @brief Send a byte using the serial interface */ 
+void serial_send_byte(uint8_t data);
 
 #endif /* SERIAL_H_ */
