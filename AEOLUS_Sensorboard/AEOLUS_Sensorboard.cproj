@@ -80,6 +80,12 @@
     <Compile Include="lidar.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="pixhawk.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="pixhawk.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="port.h">
       <SubType>compile</SubType>
     </Compile>
@@ -87,6 +93,12 @@
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="port.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="serial.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="serial.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="servo.c">
