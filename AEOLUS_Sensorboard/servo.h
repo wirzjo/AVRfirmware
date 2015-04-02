@@ -2,7 +2,7 @@
  * servo.h
  *
  * Created: 31.03.2015 14:52:59
- *  Author: Jonas
+ *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
 
 
