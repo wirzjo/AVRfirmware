@@ -12,9 +12,17 @@
 
 #include <stdbool.h>
 #include <avr/io.h>
+#include <avr/interrupt.h>
 
 #include "config.h"
 #include "serial.h"
+#include "pixhawk.h"
+
+
+/************************************************************************/
+/* V A R I A B L E S                                                    */
+/************************************************************************/
+
 
 
 
@@ -58,6 +66,8 @@ bool serial_init(unsigned int baud) {
 	//Set frame format: 8data, 2stop bit 
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00); 
 	
+	
+	//Everything is OK => return true
 	return true; 
 }
 
@@ -92,6 +102,24 @@ uint8_t serial_receive_byte(void) {
 }
 
 
+
+/************************************************************************/
+/* I N T E R R U P T    H A N D L E R S                                 */
+/************************************************************************/
+
+/** 
+ * Interrupt for complete reception. 
+ * This interrupt occurs, as soon as a character was successfully read. 
+ */
+ISR(USART_RX_vect) {
+	
+	//Store data locally 
+	uint8_t data = UDR0; 
+	
+	//Notify the Pixhawk-Module that new data is available 
+	pixhawk_parse(data);
+	
+}
 
 
 
