@@ -17,7 +17,7 @@
  * Init the Ports 
  *
  */
-void port_init(void) {
+bool port_init(void) {
 	
 	//Set data direction (Output/Input) 
 	DDRB = 0xff;	//All ports are outputs
@@ -29,7 +29,7 @@ void port_init(void) {
 	PORTC = 0x00; 
 	PORTD = 0x00; 
 	
-	
+	return true; 
 } 
 
 

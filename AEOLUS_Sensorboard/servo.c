@@ -9,8 +9,10 @@
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch> 
  */ 
 
-#include "servo.h"
 #include <avr/io.h>
+
+#include "config.h"
+#include "servo.h"
 
 #define minPWM 550		//most left position, say 0°
 #define maxPWM 2350     //most right position, say 180°
@@ -19,9 +21,7 @@
 /** 
  * Initialize the use of a Servo 	
  */
-void servo_init(void) {
-	
-	
+bool servo_init(void) {
 	
 	DDRD |= 0xFF;		//Set DDRD as output 
 	TCCR1A |= (1<<WGM11) | (1<<COM1A1);		
@@ -34,6 +34,7 @@ void servo_init(void) {
 	//Init the Servo and make sure it starts in 90° Position. 
 	servo_set(90); 
 	
+	return true; 
 }
 
 

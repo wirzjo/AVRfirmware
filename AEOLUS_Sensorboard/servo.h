@@ -9,9 +9,11 @@
 #ifndef SERVO_H_
 #define SERVO_H_
 
+#include <stdbool.h>
+
 
 /* @brief Init the use of a Servo */ 
-void servo_init(void);
+bool servo_init(void);
 
 
 /* @brief Set the servo to a given angle in Degrees */

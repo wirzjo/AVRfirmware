@@ -19,11 +19,15 @@
 
 
 #include <avr/io.h>
-#include <util/delay.h>
+#include <avr/interrupt.h>
 #include <stdbool.h>
 
+#include "config.h"
 #include "port.h"
 #include "servo.h"
+#include "lidar.h"
+
+#include <util/delay.h>
 
 int main(void)
 {
@@ -32,19 +36,31 @@ int main(void)
 	/* BOOT                                                                 */
 	/************************************************************************/
 	
+	bool boot_state = true;		//true, if everything is fine during the boot process 
+	
+	//Disable any Interrupt 
+	cli(); 
+	
 	//Init the input/output ports 
-	port_init(); 
+	boot_state = boot_state && port_init(); 
 	
 	//Init the use of a Servo
-	servo_init(); 
+	boot_state = boot_state && servo_init(); 
+	
+	//Init the use of the LIDAR 
+	boot_state = boot_state && lidar_init(); 
 	
 	
 	
 	/************************************************************************/
 	/* MAIN WHILE LOOP                                                      */
 	/************************************************************************/
-    while(1)
+    while(boot_state)
     {
+		/* Note this main while-loop is only started if all Sensors are initialized successfully 
+		 * Otherwise for safety reasons the main loop is not started at all */ 
+		
+		
 		//Toggle LED  
 		port_led(true);
 		

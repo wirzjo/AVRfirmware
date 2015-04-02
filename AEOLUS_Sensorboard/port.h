@@ -2,16 +2,20 @@
  * port.h
  *
  * Created: 31.03.2015 14:55:01
- *  Author: Jonas
+ *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
 
 
-#ifndef INCFILE1_H_
-#define INCFILE1_H_
+#ifndef PORT_H_
+#define PORT_H_
+
 
 /* @brief Init the Ports */ 
-void port_init(void); 
+bool port_init(void); 
+
+/* @brief Toggle the state of the LED */ 
+void port_led(bool state); 
 
 
 
-#endif /* INCFILE1_H_ */
+#endif /* PORT_H_ */
