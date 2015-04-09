@@ -13,7 +13,6 @@
  * 
  *	- Add Watchdog
  *  - Add Sleep-Mode
- *  - Add I2C Protocoll
  *  - Add proper scheduling 
  */
 
@@ -48,7 +47,7 @@ int main(void)
 	boot_state = boot_state && servo_init(); 
 	
 	//Init the use of the LIDAR 
-	boot_state = boot_state && lidar_init(); 
+	boot_state = boot_state && (lidar_init()||true);     //DEBUG: Remove true, this is only, because no lidar is present by now 
 	
 	
 	
@@ -66,7 +65,7 @@ int main(void)
 		
 		//Move Servo from 0 to 180° in Steps of 5°
 		uint8_t ang = 0; 
-		for(ang = 0; ang <= 180; ang = ang+2) {
+		for(ang = 0; ang <= 180; ang = ang+5) {
 		servo_set(ang); 
 		_delay_ms(50); 
 		}		
