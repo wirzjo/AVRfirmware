@@ -86,12 +86,17 @@ bool pixhawk_init(void) {
 	rx_state = IDLE; 
 	
 	
+	//Init the serial communication 
+	serial_init(9600); 
+	
+	
 	return true; 
 }
 
 
 /**
  * Parsing new data that is available from the serial interface 
+ * Note: This function is called by the "Receive completed interrupt"
  *
  * @param Pointer to a circular buffer 
  */

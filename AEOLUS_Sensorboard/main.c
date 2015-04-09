@@ -25,6 +25,7 @@
 #include "port.h"
 #include "servo.h"
 #include "lidar.h"
+#include "serial.h"
 
 #include <util/delay.h>
 
@@ -47,7 +48,11 @@ int main(void)
 	boot_state = boot_state && servo_init(); 
 	
 	//Init the use of the LIDAR 
-	boot_state = boot_state && (lidar_init()||true);     //DEBUG: Remove true, this is only, because no lidar is present by now 
+	boot_state = boot_state && (lidar_init()||true);     //DEBUG: Remove true, this is only, because no lidar is present by now
+	
+	
+	//Init the use of the Pixhawk 
+	pixhawk_init(); 
 	
 	
 	
@@ -60,9 +65,23 @@ int main(void)
 		 * Otherwise for safety reasons the main loop is not started at all */ 
 		
 		
-		//Toggle LED  
+		//Toggle LED => show that program is running  
 		port_led(true);
+		_delay_ms(1000); 
 		
+		
+		//Send a byte to the pixhawk using the serial interface in every loop 
+		serial_send_byte(0x41); //Send a capital A 
+		serial_send_byte(0x42); //Send a capital B  
+		
+		
+		port_led(false); 
+		_delay_ms(1000); 
+		
+		
+		
+		
+		/*
 		//Move Servo from 0 to 180° in Steps of 5°
 		uint8_t ang = 0; 
 		for(ang = 0; ang <= 180; ang = ang+5) {
@@ -75,6 +94,7 @@ int main(void)
 		_delay_ms(1000); 
 		servo_set(0); 
 		_delay_ms(1000);	
+		*/
 		
     }
 }
