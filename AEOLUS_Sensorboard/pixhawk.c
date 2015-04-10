@@ -8,8 +8,9 @@
  *
  * The protocol is as follows: 
  * 1) Read request from Pixhawk: 
- *    0x02 | 0x02 | Command-Byte | 0x03
- * 2) Answer to read request 
+ *    0x02 | 0x02 | Command-Byte | heading0 | heading1 | 0x03
+ *    Note: heading0 and heading1 are the high and the low byte of the heading wrt. true north of the boat 
+ * 2) Answer to a read request 
  *    0x02 | 0x02 | Command-Byte | ...variable length of data bytes dependent on the command... | 0x03
  *
  *
@@ -30,10 +31,12 @@
 /* V A R I A B L E S                                                    */
 /************************************************************************/
 
-typedef enum{IDLE,STARTCHAR, COMMAND, ENDCHAR, COMPLETE, ERROR} state_enum;	
+typedef enum{IDLE,STARTCHAR, COMMAND, HEAD0, HEAD1, ENDCHAR, COMPLETE, ERROR} state_enum;	
 static state_enum rx_state = IDLE;  //State for the receive-finite state machine
 
 static uint8_t cmd = 0x00;			//Last Command transmitted by the message
+static uint8_t head0 = 0x00;		//High byte of the heading 
+static uint8_t head1 = 0x00;		//Low byte of the heading 
 
 #define MAXNROFOBSTACLES 10			//Maximum number of obstacles that can be detected and reported to Pixhawk 
 
@@ -41,8 +44,10 @@ static uint8_t cmd = 0x00;			//Last Command transmitted by the message
 static struct {
 	uint8_t numofobstacles;			//Current number of obstacles known 
 	obstacle obstacles[MAXNROFOBSTACLES]; //Obstacles represented as Obstacle-Objects 
+	uint16_t heading;				//Current heading of the boat known from Pixhawk 
 } state = {
-	.numofobstacles = 0
+	.numofobstacles = 0, 
+	.heading = 0
 };
 
 
@@ -147,6 +152,34 @@ bool pixhawk_parse(uint8_t data) {
 				rx_state = ENDCHAR; 
 			}
 		}
+		case HEAD0: {
+			//The command was sent => expect to receive the "heading0" char 
+			
+			if(data == MSG_START || data == MSG_END) {
+				//We received again a Start or End Character or a 0 => ERROR
+				//return to IDLE
+				
+				rx_state = IDLE;
+			} else {
+				//The char is valid => store it
+				head0 = data; 
+				rx_state = HEAD1;
+			}
+		}
+		case HEAD1: {
+			//The first heading byte was receives => expect to receive the second one 
+			
+			if(data == MSG_START || data == MSG_END) {
+				//We received again a Start or End Character or a 0 => ERROR
+				//return to IDLE
+				
+				rx_state = IDLE;
+			} else {
+				//The char is valid => store it
+				head1 = data;
+				rx_state = ENDCHAR;
+			}
+		}
 		case ENDCHAR: {
 			//The command byte was read and we wait for the end-byte 
 			
@@ -163,6 +196,9 @@ bool pixhawk_parse(uint8_t data) {
 		case COMPLETE: {
 			//A complete message was received => send requested data to pixhawk 
 			send2pixhawk(cmd); 
+			
+			//Store the heading transmitted with the request
+			state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1); 
 			
 			//Return to state IDLE in order to wait for the next command 
 			rx_state = IDLE; 

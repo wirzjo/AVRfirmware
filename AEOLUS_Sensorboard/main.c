@@ -52,7 +52,7 @@ int main(void)
 	
 	
 	//Init the use of the Pixhawk 
-	pixhawk_init(); 
+	pixhawk_init();					//DEBUG: add this init ot the bool boot_state
 	
 	
 	
