@@ -51,10 +51,12 @@ void flush(void);
 bool serial_init(unsigned int baud) {
 	
 	//Use "Asynchronous double speed mode U2X0 = 1) 
-	UCSR0A |= (1<<U2X0); 
+	//UCSR0A |= (1<<U2X0); double speed mode 
+	UCSR0A &= ~(1<<U2X0); //normal speed mode 
+	
 
 	//Calculate the baudrate
-	uint8_t ubrr = (double)(F_CPU/16/baud-1); 
+	uint8_t ubrr = (double)(F_CPU/16/baud-1);  //Note change 16 to 8 for double speed mode 
 	
 	//Set baudrate 
 	UBRR0H = (unsigned char)(ubrr>>8); 

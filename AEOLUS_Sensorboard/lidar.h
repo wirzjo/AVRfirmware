@@ -10,6 +10,7 @@
 #define LIDAR_H_
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* @brief Init the use of the lidar-sensor */ 
 bool lidar_init(void);

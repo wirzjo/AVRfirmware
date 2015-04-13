@@ -42,8 +42,20 @@ bool servo_init(void) {
 /**
  * Set the Servo to a given angle
  * 
- * @param deg: angele in degrees the servo should move to 
+ * @param deg: angle in degrees the servo should move to 
  */
 void servo_set(float deg) {
-	OCR1A = ICR1 - ((maxPWM-minPWM)/180.0f*deg + minPWM); 
+    
+	uint16_t pwm =  ICR1 - ((maxPWM-minPWM)/180.0f*deg + minPWM);
+	
+	//Saturate PWM output
+	if(pwm<minPWM) {
+		pwm = minPWM; 
+	}
+	
+	if(pwm>maxPWM) {
+		pwm = maxPWM;
+	}
+	
+	OCR1A = pwm; 
 }

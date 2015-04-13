@@ -11,6 +11,15 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+/** INTERVAL [°]
+ * Angle between two distance measurements in degrees */ 
+#define INTERVAL 2 
+
+/** RANGE [°]
+ * Angle between boat middle axis and end of sector for measurement */ 
+#define RANGE 100 
+
+
 /** CPU-Frequency [Hz] */
 #define F_CPU 8000000 
 

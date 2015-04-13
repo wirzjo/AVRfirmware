@@ -6,6 +6,8 @@ I2C.c
 
 lidar.c
 
+measure.c
+
 pixhawk.c
 
 main.c

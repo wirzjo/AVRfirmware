@@ -80,6 +80,12 @@
     <Compile Include="lidar.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="measure.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="measure.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="pixhawk.c">
       <SubType>compile</SubType>
     </Compile>

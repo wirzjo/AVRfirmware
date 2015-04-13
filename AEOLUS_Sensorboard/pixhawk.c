@@ -216,6 +216,16 @@ bool pixhawk_parse(uint8_t data) {
 
 
 
+/**
+ * Get the last known Heading of the boat
+ *
+ */
+uint16_t pixhawk_get_heading(void) {
+	return state.heading; 
+}
+
+
+
 
 /************************************************************************/
 /* P R I V A T E    F U N C T I O N S                                   */

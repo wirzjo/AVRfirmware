@@ -37,6 +37,7 @@ SUBDIRS :=
 C_SRCS +=  \
 ../I2C.c \
 ../lidar.c \
+../measure.c \
 ../pixhawk.c \
 ../main.c \
 ../port.c \
@@ -53,6 +54,7 @@ ASM_SRCS +=
 OBJS +=  \
 I2C.o \
 lidar.o \
+measure.o \
 pixhawk.o \
 main.o \
 port.o \
@@ -63,6 +65,7 @@ servo.o
 OBJS_AS_ARGS +=  \
 I2C.o \
 lidar.o \
+measure.o \
 pixhawk.o \
 main.o \
 port.o \
@@ -73,6 +76,7 @@ servo.o
 C_DEPS +=  \
 I2C.d \
 lidar.d \
+measure.d \
 pixhawk.d \
 main.d \
 port.d \
@@ -83,6 +87,7 @@ servo.d
 C_DEPS_AS_ARGS +=  \
 I2C.d \
 lidar.d \
+measure.d \
 pixhawk.d \
 main.d \
 port.d \
@@ -99,6 +104,8 @@ ADDITIONAL_DEPENDENCIES:=
 OUTPUT_FILE_DEP:= ./makedep.mk
 
 # AVR32/GNU C Compiler
+
+
 
 
 
