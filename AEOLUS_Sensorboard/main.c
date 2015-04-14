@@ -77,8 +77,8 @@ int main(void)
 		uint16_t dist = lidar_get_distance();
 		
 		char buffer[10]; 
-		//sprintf(buffer,"Dist: %d",dist);
-		//serial_send_string(buffer);
+		sprintf(buffer,"Dist: %d",dist);
+		serial_send_string(buffer);
 		
 		
 		//serial_send_byte('\n'); //Send a Line-Feed 

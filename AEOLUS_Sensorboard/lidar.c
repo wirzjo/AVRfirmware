@@ -122,7 +122,7 @@ uint16_t lidar_get_distance(void) {
 	uint8_t result[2]; 
 	
 	if(!write_register(0x00,0x04)) {
-		serial_send_string("error measure"); 
+		//serial_send_string("error measure"); 
 		return 0; 
 	}
 	
@@ -146,11 +146,11 @@ uint16_t lidar_get_distance(void) {
 	
 	//Send result to serial terminal 
 	
-	serial_send_byte('A'); 
-	serial_send_byte(result[0]); 
-	serial_send_byte(result[1]);
-	serial_send_byte('\n');
-	serial_send_byte(0x0D);  
+	//serial_send_byte('A'); 
+	//serial_send_byte(result[0]); 
+	//serial_send_byte(result[1]);
+	//serial_send_byte('\n');
+	//serial_send_byte(0x0D);  
 	
 	//We read two 8bit values => convert to a 16bit value
 	return ((result[0] << 8) | result[1]);  
