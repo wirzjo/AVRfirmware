@@ -31,7 +31,7 @@
 /* V A R I A B L E S                                                    */
 /************************************************************************/
 
-typedef enum{IDLE,STARTCHAR, COMMAND, HEAD0, HEAD1, ENDCHAR, COMPLETE, ERROR} state_enum;	
+typedef enum{IDLE,STARTCHAR, COMMAND, HEAD0, HEAD1, ENDCHAR, ERROR} state_enum;	
 static state_enum rx_state = IDLE;  //State for the receive-finite state machine
 
 static uint8_t cmd = 0x00;			//Last Command transmitted by the message
@@ -50,6 +50,8 @@ static struct {
 	.heading = 0
 };
 
+static bool flag_send = false; 
+
 
 
 
@@ -62,7 +64,8 @@ static struct {
 
 #define CMD_OBSTACLES	0x4F	//Send the bearings and distances to every obstacle in range
 								//Note: bearing (high/low byte) and then the distance is sent
-#define CMD_NUMOBSTACLES 0x4E   //Number of obstacles currently in range 	
+#define CMD_NUMOBSTACLES 0x4E   //Number of obstacles currently in range 
+#define CMD_LASTDIST    0x4A    //Latest known distance from the LIDAR 	
 
 
 
@@ -109,7 +112,7 @@ bool pixhawk_parse(uint8_t data) {
 	
 	//Text starts with STX = 0x02 and ends with ETX = 0x03
 	//A message from the Pixhawk must have the following form: 
-	// 0x02 | 0x02 | 0xXX (Command byte) | 0x03
+	// 0x02 | 0x02 | 0xXX (Command byte) | 0x03 
 	
 	switch(rx_state) {
 		case IDLE: {
@@ -120,6 +123,8 @@ bool pixhawk_parse(uint8_t data) {
 				
 				rx_state = STARTCHAR; 			 
 			}
+			
+			break; 
 		}
 		case STARTCHAR: {
 			//The first Start-Character was sent and we are waiting for the second one now 
@@ -133,8 +138,9 @@ bool pixhawk_parse(uint8_t data) {
 				//No second Start-Character was sent => return to IDLE
 				
 				rx_state = IDLE; 
-			}			
+			}	
 			
+			break;		
 		}
 		case COMMAND: {
 			//The second Start-Character was sent, now we expect to receive the Command 
@@ -149,8 +155,10 @@ bool pixhawk_parse(uint8_t data) {
 				
 				cmd = data; 
 				
-				rx_state = ENDCHAR; 
+				rx_state = HEAD0; 
 			}
+			
+			break; 
 		}
 		case HEAD0: {
 			//The command was sent => expect to receive the "heading0" char 
@@ -165,6 +173,8 @@ bool pixhawk_parse(uint8_t data) {
 				head0 = data; 
 				rx_state = HEAD1;
 			}
+			
+			break; 
 		}
 		case HEAD1: {
 			//The first heading byte was receives => expect to receive the second one 
@@ -179,6 +189,8 @@ bool pixhawk_parse(uint8_t data) {
 				head1 = data;
 				rx_state = ENDCHAR;
 			}
+			
+			break; 
 		}
 		case ENDCHAR: {
 			//The command byte was read and we wait for the end-byte 
@@ -186,28 +198,30 @@ bool pixhawk_parse(uint8_t data) {
 			if(data == MSG_END) {
 				//We received the End Character => Data is valid 
 				
-				rx_state = COMPLETE;
+				port_led_blink(1); 
+				
+				flag_send = true; 
+				
+				//Store the heading transmitted with the request
+				state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1);
+				
+				rx_state = IDLE; 
+			
 			} else {
 				//Some error occurred => return to IDLE
 		 				
 				rx_state = IDLE;
 			}
-		}
-		case COMPLETE: {
-			//A complete message was received => send requested data to pixhawk 
-			send2pixhawk(cmd); 
 			
-			//Store the heading transmitted with the request
-			state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1); 
-			
-			//Return to state IDLE in order to wait for the next command 
-			rx_state = IDLE; 
+			break; 
 		}
 		default: {
 			//This code should never be reached
 			//Nothing we can do about, if we reach it...just go back to IDLE
 			
 			rx_state = IDLE; 
+			
+			break; 
 		}
 	}
 	
@@ -222,6 +236,26 @@ bool pixhawk_parse(uint8_t data) {
  */
 uint16_t pixhawk_get_heading(void) {
 	return state.heading; 
+}
+
+
+/**
+ * Handle repetitive tasks like sending data 
+ * Note: This function should be called in every program loop 
+ * 
+ */
+void pixhawk_handler(void) {
+
+	if(flag_send) {
+		//Data needs to be sent 
+		port_led_blink(2);
+		
+		//serial_send_byte(cmd); 
+		send2pixhawk(cmd); 
+		
+		cmd = 0x00;
+		flag_send = false;  
+	}
 }
 
 
@@ -240,6 +274,7 @@ bool send2pixhawk(uint8_t cmd) {
 	
 	//Send start-sequence 
 	serial_send_byte(MSG_START);
+	serial_send_byte(MSG_START);
 	
 	//Send Command number 
 	serial_send_byte(cmd); 
@@ -254,12 +289,26 @@ bool send2pixhawk(uint8_t cmd) {
 				//serial_send_byte((uint8_t)(state.obstacles[i].distance>>8)); //High byte of distance 
 				//serial_send_byte((uint8_t)(state.obstacles[i]&0x00FF));		 //Low byte of distance 
 			}
+			
+			break; 
 		}
 		case CMD_NUMOBSTACLES: {
 			serial_send_byte(state.numofobstacles);
+			
+			break; 
+		}
+		case CMD_LASTDIST: {
+			//Return the last measured distance by the LIDAR in two bytes (high-byte first) 
+			uint16_t dist = lidar_get_distance(); 
+			serial_send_byte((uint8_t)(dist>>8)); 
+			serial_send_byte((uint8_t)(dist)); 
+			
+			break; 
 		}
 		default: {
 			//An invalid command was sent => might flag unhappy...
+			
+			//port_led_blink(2); 
 			
 			return false; 
 		}

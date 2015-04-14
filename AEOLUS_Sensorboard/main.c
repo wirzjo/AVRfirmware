@@ -54,6 +54,11 @@ int main(void)
 	//Init the use of the Pixhawk 
 	pixhawk_init();					//DEBUG: add this init ot the bool boot_state
 	
+	//Init the measurement 
+	measure_init(); 
+	
+	//Allow for Interrupts (e.g. for serial communication) 
+	sei(); 
 	
 	char str[] = {"OK"}; 
 	serial_send_string(str); 
@@ -68,35 +73,25 @@ int main(void)
 		 * Otherwise for safety reasons the main loop is not started at all */ 
 		
 		
+		//Send data to Pixhawk 
+		pixhawk_handler(); 
 		
 		
-		port_led_blink(2); 
+		//Do Measurements 
+		measure_handler(); 
+		
+		
+		//port_led_blink(2); 
 		//_delay_ms(1000);  
 		
 		
-		uint16_t dist = lidar_get_distance();
 		
-		char buffer[10]; 
-		sprintf(buffer,"Dist: %d",dist);
-		serial_send_string(buffer);
+		//DISPLAY THE LIDAR DISTANCE IN SERIAL INTERFACE
+		//uint16_t dist = lidar_get_distance();
 		
-		
-		
-		
-		/*
-		//Move Servo from 0 to 180° in Steps of 5°
-		uint8_t ang = 0; 
-		for(ang = 0; ang <= 180; ang = ang+5) {
-		servo_set(ang); 
-		_delay_ms(50); 
-		}		
-
-		//Toggle LED 
-		port_led(false);
-		_delay_ms(1000); 
-		servo_set(0); 
-		_delay_ms(1000);	
-		*/
+		//char buffer[10]; 
+		//sprintf(buffer,"Dist: %d",dist);
+		//serial_send_string(buffer);
 		
     }
 }

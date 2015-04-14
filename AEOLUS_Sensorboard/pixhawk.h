@@ -26,5 +26,8 @@ bool pixhawk_init(void);
 /* @brief Parse data from the serial rx_buffer */ 
 bool pixhawk_parse(uint8_t data);
 
+/* @brief Handle repetitive tasks */  
+void pixhawk_handler(void);
+
 
 #endif /* PIXHAWK_H_ */

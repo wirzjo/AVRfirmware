@@ -8,7 +8,9 @@
  */ 
 
 #include "config.h"
+#include <avr/delay.h>
 #include "lidar.h"
+#include "servo.h"
 #include "serial.h"
 
 #define SERVOFACTOR 1 //Factor the Angle has to be decreased for the Servo => the servo has a maximum range of -90°,90° <=> 0°,180°
@@ -60,8 +62,13 @@ void measure_init(void) {
  * => This function should be called in every iteration step in the main-function or by a timer interrupt, dependent on the 
  *    scheduling strategy.  
  */
-void measure_step(void) {
+void measure_handler(void) {
 	
+	
+	uint16_t dist = lidar_measure();
+	_delay_ms(500); 
+	
+	/*
 	//Check if we already finished one round 
 	if(state.angle>=2*RANGE) {
 		//We are at the end => on backbord-side 
@@ -82,13 +89,14 @@ void measure_step(void) {
 	servo_set(state.angle * SERVOFACTOR); 
 	
 	//DO THE MEASUREMENT  
-	uint16_t dist = lidar_get_distance();
+	uint16_t dist = lidar_measure();
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
 	filter(&dist); 
 	
 	//Increase the Angle 
 	state.angle += state.direction * INTERVAL; 	
+	*/
 }
 
 

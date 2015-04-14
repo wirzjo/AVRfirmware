@@ -69,6 +69,9 @@ bool serial_init(unsigned int baud) {
 	//Set frame format: 8data, 2stop bit 
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00); 
 	
+	//Allow receive interrupts 
+	UCSR0B |= (1<<RXCIE0); 
+	
 	
 	//Wait a moment to Set registers 
 	_delay_ms(1000); 

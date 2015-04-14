@@ -39,6 +39,13 @@
 #define READ 1				//Read access to the register 
 
 
+static struct {
+	uint16_t last_distance;		//Last measured distance 
+} state = {
+	.last_distance = 0
+};
+
+
 
 /************************************************************************/
 /* C O M M A N D S                                                      */
@@ -118,7 +125,7 @@ bool lidar_init(void) {
  *
  * @return the measured distance [cm] (Note: 16bit value!) 
  */ 
-uint16_t lidar_get_distance(void) {
+uint16_t lidar_measure(void) {
 	uint8_t result[2]; 
 	
 	if(!write_register(0x00,0x04)) {
@@ -126,7 +133,7 @@ uint16_t lidar_get_distance(void) {
 		return 0; 
 	}
 	
-	_delay_ms(10); 
+	_delay_ms(100); 
 	
 	//Read the Distance from the Register using I2C
 	if(!read_register(0x0f,2,result)) {
@@ -135,30 +142,28 @@ uint16_t lidar_get_distance(void) {
 		
 		return 0; 
 	}
-	/*if(!read_register(0x0f,1,&result[0])) {
-		serial_send_string("first byte error"); 
-		return 0; 
-	}
+
 	
-	if(!read_register(0x10,1,&result[1])) {
-		serial_send_string("second byte error"); 
-		return 0; 
-	}*/
+	//Since we read a new distance from the Sensor, we can store it as the local state 
+	state.last_distance = ((result[0] << 8) | result[1]);
+ 
 	
-	
-	//Send result to serial terminal 
-	
-	//serial_send_byte('A'); 
-	//serial_send_byte(result[0]); 
-	//serial_send_byte(result[1]);
-	//serial_send_byte('\n');
-	//serial_send_byte(0x0D);  
-	
-	//We read two 8bit values => convert to a 16bit value
-	return ((result[0] << 8) | result[1]);  
+	//Return the current distance 
+	return state.last_distance;  
 	
 }
 
+
+
+/**
+ * Get the last known distance from the sensor 
+ *
+ * @return The latest known distance 
+ */
+uint16_t lidar_get_distance(void) {
+	
+	return state.last_distance; 
+}
 
 
 
