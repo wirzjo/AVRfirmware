@@ -3,31 +3,31 @@ AEOLUS_Sensorboard.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         0000003a  00800100  000009ca  00000a5e  2**0
+  0 .data         00000018  00800100  000009ca  00000a5e  2**0
                   CONTENTS, ALLOC, LOAD, DATA
   1 .text         000009ca  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000061  0080013a  0080013a  00000a98  2**0
+  2 .bss          00000061  00800118  00800118  00000a76  2**0
                   ALLOC
-  3 .stab         00001ba8  00000000  00000000  00000a98  2**2
+  3 .stab         00001ba8  00000000  00000000  00000a78  2**2
                   CONTENTS, READONLY, DEBUGGING
-  4 .stabstr      00000583  00000000  00000000  00002640  2**0
+  4 .stabstr      00000583  00000000  00000000  00002620  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_aranges 000001a0  00000000  00000000  00002bc8  2**3
+  5 .debug_aranges 000001a0  00000000  00000000  00002ba8  2**3
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00001176  00000000  00000000  00002d68  2**0
+  6 .debug_info   000011fd  00000000  00000000  00002d48  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 00000833  00000000  00000000  00003ede  2**0
+  7 .debug_abbrev 0000089e  00000000  00000000  00003f45  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000d45  00000000  00000000  00004711  2**0
+  8 .debug_line   00000de8  00000000  00000000  000047e3  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000340  00000000  00000000  00005458  2**2
+  9 .debug_frame  00000340  00000000  00000000  000055cc  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    00000431  00000000  00000000  00005798  2**0
+ 10 .debug_str    00000431  00000000  00000000  0000590c  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    0000068f  00000000  00000000  00005bc9  2**0
+ 11 .debug_loc    000006d7  00000000  00000000  00005d3d  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000048  00000000  00000000  00006258  2**0
+ 12 .debug_ranges 00000048  00000000  00000000  00006414  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -77,13 +77,13 @@ Disassembly of section .text:
   4a:	02 c0       	rjmp	.+4      	; 0x50 <__do_copy_data+0x10>
   4c:	05 90       	lpm	r0, Z+
   4e:	0d 92       	st	X+, r0
-  50:	aa 33       	cpi	r26, 0x3A	; 58
+  50:	a8 31       	cpi	r26, 0x18	; 24
   52:	b1 07       	cpc	r27, r17
   54:	d9 f7       	brne	.-10     	; 0x4c <__do_copy_data+0xc>
 
 00000056 <__do_clear_bss>:
   56:	11 e0       	ldi	r17, 0x01	; 1
-  58:	aa e3       	ldi	r26, 0x3A	; 58
+  58:	a8 e1       	ldi	r26, 0x18	; 24
   5a:	b1 e0       	ldi	r27, 0x01	; 1
   5c:	01 c0       	rjmp	.+2      	; 0x60 <.do_clear_bss_start>
 
@@ -91,7 +91,7 @@ Disassembly of section .text:
   5e:	1d 92       	st	X+, r1
 
 00000060 <.do_clear_bss_start>:
-  60:	ab 39       	cpi	r26, 0x9B	; 155
+  60:	a9 37       	cpi	r26, 0x79	; 121
   62:	b1 07       	cpc	r27, r17
   64:	e1 f7       	brne	.-8      	; 0x5e <.do_clear_bss_loop>
   66:	9d d1       	rcall	.+826    	; 0x3a2 <main>
@@ -327,54 +327,60 @@ bool write_register(uint8_t reg, uint8_t data) {
  128:	d8 2f       	mov	r29, r24
  12a:	c6 2f       	mov	r28, r22
 	
-	serial_send_string("WRITE..."); 
- 12c:	80 e0       	ldi	r24, 0x00	; 0
- 12e:	91 e0       	ldi	r25, 0x01	; 1
- 130:	e0 d1       	rcall	.+960    	; 0x4f2 <serial_send_string>
+	//serial_send_string("WRITE..."); 
 	
 	//Start the I2C Master interface. 
 	//We want to write a register => access-type is WRITE 
 	if(!I2C_start (0xC4, WRITE)) {
- 132:	84 ec       	ldi	r24, 0xC4	; 196
- 134:	60 e0       	ldi	r22, 0x00	; 0
- 136:	a6 df       	rcall	.-180    	; 0x84 <I2C_start>
- 138:	88 23       	and	r24, r24
- 13a:	31 f4       	brne	.+12     	; 0x148 <write_register+0x24>
+ 12c:	84 ec       	ldi	r24, 0xC4	; 196
+ 12e:	60 e0       	ldi	r22, 0x00	; 0
+ 130:	a9 df       	rcall	.-174    	; 0x84 <I2C_start>
+ 132:	88 23       	and	r24, r24
+ 134:	19 f4       	brne	.+6      	; 0x13c <write_register+0x18>
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 		
-		serial_send_string("can not write"); 
- 13c:	89 e0       	ldi	r24, 0x09	; 9
- 13e:	91 e0       	ldi	r25, 0x01	; 1
- 140:	d8 d1       	rcall	.+944    	; 0x4f2 <serial_send_string>
+		//serial_send_string("can not write"); 
 		I2C_stop();
- 142:	bf df       	rcall	.-130    	; 0xc2 <I2C_stop>
+ 136:	c5 df       	rcall	.-118    	; 0xc2 <I2C_stop>
 		
 		return false; 
- 144:	80 e0       	ldi	r24, 0x00	; 0
- 146:	09 c0       	rjmp	.+18     	; 0x15a <write_register+0x36>
+ 138:	80 e0       	ldi	r24, 0x00	; 0
+ 13a:	0f c0       	rjmp	.+30     	; 0x15a <write_register+0x36>
 	} else {
 		//I2C Master Interface is started => we can transfer the bytes to the slave 
 		
 		//Send Register address 
 		I2C_write_byte(reg); 
- 148:	8d 2f       	mov	r24, r29
- 14a:	c4 df       	rcall	.-120    	; 0xd4 <I2C_write_byte>
+ 13c:	8d 2f       	mov	r24, r29
+ 13e:	ca df       	rcall	.-108    	; 0xd4 <I2C_write_byte>
 		
 		//Send Value the register should contain 
 		I2C_write_byte(data);
- 14c:	8c 2f       	mov	r24, r28
- 14e:	c2 df       	rcall	.-124    	; 0xd4 <I2C_write_byte>
+ 140:	8c 2f       	mov	r24, r28
+ 142:	c8 df       	rcall	.-112    	; 0xd4 <I2C_write_byte>
 		
 		//Close the Master-Interface 
 		I2C_stop(); 
- 150:	b8 df       	rcall	.-144    	; 0xc2 <I2C_stop>
-	}
+ 144:	be df       	rcall	.-132    	; 0xc2 <I2C_stop>
+	#else
+		//round up by default
+		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
+	#endif
+
+	__builtin_avr_delay_cycles(__ticks_dc);
+ 146:	8f ef       	ldi	r24, 0xFF	; 255
+ 148:	90 e7       	ldi	r25, 0x70	; 112
+ 14a:	a2 e0       	ldi	r26, 0x02	; 2
+ 14c:	81 50       	subi	r24, 0x01	; 1
+ 14e:	90 40       	sbci	r25, 0x00	; 0
+ 150:	a0 40       	sbci	r26, 0x00	; 0
+ 152:	e1 f7       	brne	.-8      	; 0x14c <write_register+0x28>
+ 154:	00 c0       	rjmp	.+0      	; 0x156 <write_register+0x32>
+ 156:	00 00       	nop
 	
-	serial_send_string("EOF write"); 
- 152:	87 e1       	ldi	r24, 0x17	; 23
- 154:	91 e0       	ldi	r25, 0x01	; 1
- 156:	cd d1       	rcall	.+922    	; 0x4f2 <serial_send_string>
+	//serial_send_string("EOF write");
+	_delay_ms(100);  
 	
 	//Everything is OK => return true
 	return true; 
@@ -576,7 +582,7 @@ uint16_t lidar_get_distance(void) {
  1ee:	88 23       	and	r24, r24
  1f0:	31 f4       	brne	.+12     	; 0x1fe <lidar_get_distance+0x20>
 		serial_send_string("error measure"); 
- 1f2:	81 e2       	ldi	r24, 0x21	; 33
+ 1f2:	80 e0       	ldi	r24, 0x00	; 0
  1f4:	91 e0       	ldi	r25, 0x01	; 1
  1f6:	7d d1       	rcall	.+762    	; 0x4f2 <serial_send_string>
 		return 0; 
@@ -663,13 +669,13 @@ void measure_init(void) {
 	
 	//Init the Angle (we start on Starboard) 
 	state.angle = 0; 
- 24e:	10 92 30 01 	sts	0x0130, r1
- 252:	10 92 2f 01 	sts	0x012F, r1
+ 24e:	10 92 0f 01 	sts	0x010F, r1
+ 252:	10 92 0e 01 	sts	0x010E, r1
 	
 	//Set the direction (Starboard to Backboard) 
 	state.direction = 1; 
  256:	81 e0       	ldi	r24, 0x01	; 1
- 258:	80 93 31 01 	sts	0x0131, r24
+ 258:	80 93 10 01 	sts	0x0110, r24
 	
 }
  25c:	08 95       	ret
@@ -681,8 +687,8 @@ void measure_step(void) {
 	
 	//Check if we already finished one round 
 	if(state.angle>=2*RANGE) {
- 25e:	80 91 2f 01 	lds	r24, 0x012F
- 262:	90 91 30 01 	lds	r25, 0x0130
+ 25e:	80 91 0e 01 	lds	r24, 0x010E
+ 262:	90 91 0f 01 	lds	r25, 0x010F
  266:	88 3c       	cpi	r24, 0xC8	; 200
  268:	91 05       	cpc	r25, r1
  26a:	48 f0       	brcs	.+18     	; 0x27e <measure_step+0x20>
@@ -691,16 +697,16 @@ void measure_step(void) {
 		state.angle = 2*RANGE; 
  26c:	88 ec       	ldi	r24, 0xC8	; 200
  26e:	90 e0       	ldi	r25, 0x00	; 0
- 270:	90 93 30 01 	sts	0x0130, r25
- 274:	80 93 2f 01 	sts	0x012F, r24
+ 270:	90 93 0f 01 	sts	0x010F, r25
+ 274:	80 93 0e 01 	sts	0x010E, r24
 		state.direction = -1; 
  278:	8f ef       	ldi	r24, 0xFF	; 255
- 27a:	80 93 31 01 	sts	0x0131, r24
+ 27a:	80 93 10 01 	sts	0x0110, r24
 	}
 	
 	if(state.angle<=0) {
- 27e:	80 91 2f 01 	lds	r24, 0x012F
- 282:	90 91 30 01 	lds	r25, 0x0130
+ 27e:	80 91 0e 01 	lds	r24, 0x010E
+ 282:	90 91 0f 01 	lds	r25, 0x010F
  286:	00 97       	sbiw	r24, 0x00	; 0
  288:	19 f4       	brne	.+6      	; 0x290 <measure_step+0x32>
 		//We are at the end => on starboard-side
@@ -708,14 +714,14 @@ void measure_step(void) {
 		state.angle = 0; 
 		state.direction = 1; 
  28a:	81 e0       	ldi	r24, 0x01	; 1
- 28c:	80 93 31 01 	sts	0x0131, r24
+ 28c:	80 93 10 01 	sts	0x0110, r24
 	}
 	
 	
 	//MOVE THE SERVO TO THE NEW ANGLE 
 	servo_set(state.angle * SERVOFACTOR); 
- 290:	80 91 2f 01 	lds	r24, 0x012F
- 294:	90 91 30 01 	lds	r25, 0x0130
+ 290:	80 91 0e 01 	lds	r24, 0x010E
+ 294:	90 91 0f 01 	lds	r25, 0x010F
  298:	7f d1       	rcall	.+766    	; 0x598 <servo_set>
 	
 	//DO THE MEASUREMENT  
@@ -727,16 +733,16 @@ void measure_step(void) {
 	
 	//Increase the Angle 
 	state.angle += state.direction * INTERVAL; 	
- 29c:	80 91 31 01 	lds	r24, 0x0131
+ 29c:	80 91 10 01 	lds	r24, 0x0110
  2a0:	90 e0       	ldi	r25, 0x00	; 0
  2a2:	88 0f       	add	r24, r24
  2a4:	99 1f       	adc	r25, r25
- 2a6:	20 91 2f 01 	lds	r18, 0x012F
- 2aa:	30 91 30 01 	lds	r19, 0x0130
+ 2a6:	20 91 0e 01 	lds	r18, 0x010E
+ 2aa:	30 91 0f 01 	lds	r19, 0x010F
  2ae:	82 0f       	add	r24, r18
  2b0:	93 1f       	adc	r25, r19
- 2b2:	90 93 30 01 	sts	0x0130, r25
- 2b6:	80 93 2f 01 	sts	0x012F, r24
+ 2b2:	90 93 0f 01 	sts	0x010F, r25
+ 2b6:	80 93 0e 01 	sts	0x010E, r24
 }
  2ba:	08 95       	ret
 
@@ -755,7 +761,7 @@ bool pixhawk_init(void) {
 	
 	//Set the state of the parser
 	rx_state = IDLE; 
- 2be:	10 92 3a 01 	sts	0x013A, r1
+ 2be:	10 92 18 01 	sts	0x0118, r1
 	
 	
 	//Init the serial communication 
@@ -777,8 +783,8 @@ bool pixhawk_init(void) {
 uint16_t pixhawk_get_heading(void) {
 	return state.heading; 
 }
- 2cc:	80 91 99 01 	lds	r24, 0x0199
- 2d0:	90 91 9a 01 	lds	r25, 0x019A
+ 2cc:	80 91 77 01 	lds	r24, 0x0177
+ 2d0:	90 91 78 01 	lds	r25, 0x0178
  2d4:	08 95       	ret
 
 000002d6 <send2pixhawk>:
@@ -810,7 +816,7 @@ bool send2pixhawk(uint8_t cmd) {
 		case CMD_OBSTACLES: {
 			uint8_t i; 
 			for(i = 0; i<state.numofobstacles; i++) {
- 2ea:	90 91 3e 01 	lds	r25, 0x013E
+ 2ea:	90 91 1c 01 	lds	r25, 0x011C
  2ee:	99 23       	and	r25, r25
  2f0:	21 f0       	breq	.+8      	; 0x2fa <send2pixhawk+0x24>
  2f2:	80 e0       	ldi	r24, 0x00	; 0
@@ -823,7 +829,7 @@ bool send2pixhawk(uint8_t cmd) {
 		}
 		case CMD_NUMOBSTACLES: {
 			serial_send_byte(state.numofobstacles);
- 2fa:	80 91 3e 01 	lds	r24, 0x013E
+ 2fa:	80 91 1c 01 	lds	r24, 0x011C
  2fe:	f1 d0       	rcall	.+482    	; 0x4e2 <serial_send_byte>
 	}
 	
@@ -842,7 +848,7 @@ bool send2pixhawk(uint8_t cmd) {
 	// 0x02 | 0x02 | 0xXX (Command byte) | 0x03
 	
 	switch(rx_state) {
- 306:	90 91 3a 01 	lds	r25, 0x013A
+ 306:	90 91 18 01 	lds	r25, 0x0118
  30a:	93 30       	cpi	r25, 0x03	; 3
  30c:	d1 f0       	breq	.+52     	; 0x342 <pixhawk_parse+0x3c>
  30e:	94 30       	cpi	r25, 0x04	; 4
@@ -890,7 +896,7 @@ bool send2pixhawk(uint8_t cmd) {
 				//The char is valid => store it 
 				
 				cmd = data; 
- 33c:	80 93 3b 01 	sts	0x013B, r24
+ 33c:	80 93 19 01 	sts	0x0119, r24
  340:	04 c0       	rjmp	.+8      	; 0x34a <pixhawk_parse+0x44>
 			}
 		}
@@ -908,7 +914,7 @@ bool send2pixhawk(uint8_t cmd) {
 			} else {
 				//The char is valid => store it
 				head0 = data; 
- 34a:	80 93 3c 01 	sts	0x013C, r24
+ 34a:	80 93 1a 01 	sts	0x011A, r24
  34e:	04 c0       	rjmp	.+8      	; 0x358 <pixhawk_parse+0x52>
 			}
 		}
@@ -926,7 +932,7 @@ bool send2pixhawk(uint8_t cmd) {
 			} else {
 				//The char is valid => store it
 				head1 = data;
- 358:	80 93 3d 01 	sts	0x013D, r24
+ 358:	80 93 1b 01 	sts	0x011B, r24
 			}
 		}
 		case ENDCHAR: {
@@ -939,30 +945,30 @@ bool send2pixhawk(uint8_t cmd) {
 				
 				rx_state = COMPLETE;
  360:	86 e0       	ldi	r24, 0x06	; 6
- 362:	80 93 3a 01 	sts	0x013A, r24
+ 362:	80 93 18 01 	sts	0x0118, r24
  366:	02 c0       	rjmp	.+4      	; 0x36c <pixhawk_parse+0x66>
 			} else {
 				//Some error occurred => return to IDLE
 		 				
 				rx_state = IDLE;
- 368:	10 92 3a 01 	sts	0x013A, r1
+ 368:	10 92 18 01 	sts	0x0118, r1
 			}
 		}
 		case COMPLETE: {
 			//A complete message was received => send requested data to pixhawk 
 			send2pixhawk(cmd); 
- 36c:	80 91 3b 01 	lds	r24, 0x013B
+ 36c:	80 91 19 01 	lds	r24, 0x0119
  370:	b2 df       	rcall	.-156    	; 0x2d6 <send2pixhawk>
 			
 			//Store the heading transmitted with the request
 			state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1); 
- 372:	90 91 3c 01 	lds	r25, 0x013C
+ 372:	90 91 1a 01 	lds	r25, 0x011A
  376:	80 e0       	ldi	r24, 0x00	; 0
  378:	00 97       	sbiw	r24, 0x00	; 0
  37a:	49 f4       	brne	.+18     	; 0x38e <pixhawk_parse+0x88>
  37c:	81 e0       	ldi	r24, 0x01	; 1
  37e:	90 e0       	ldi	r25, 0x00	; 0
- 380:	20 91 3d 01 	lds	r18, 0x013D
+ 380:	20 91 1b 01 	lds	r18, 0x011B
  384:	22 23       	and	r18, r18
  386:	29 f4       	brne	.+10     	; 0x392 <pixhawk_parse+0x8c>
  388:	80 e0       	ldi	r24, 0x00	; 0
@@ -970,15 +976,15 @@ bool send2pixhawk(uint8_t cmd) {
  38c:	02 c0       	rjmp	.+4      	; 0x392 <pixhawk_parse+0x8c>
  38e:	81 e0       	ldi	r24, 0x01	; 1
  390:	90 e0       	ldi	r25, 0x00	; 0
- 392:	90 93 9a 01 	sts	0x019A, r25
- 396:	80 93 99 01 	sts	0x0199, r24
+ 392:	90 93 78 01 	sts	0x0178, r25
+ 396:	80 93 77 01 	sts	0x0177, r24
 		}
 		default: {
 			//This code should never be reached
 			//Nothing we can do about, if we reach it...just go back to IDLE
 			
 			rx_state = IDLE; 
- 39a:	10 92 3a 01 	sts	0x013A, r1
+ 39a:	10 92 18 01 	sts	0x0118, r1
 		}
 	}
 	
@@ -1031,7 +1037,7 @@ int main(void)
 	char str[] = {"OK"}; 
  3be:	de 01       	movw	r26, r28
  3c0:	11 96       	adiw	r26, 0x01	; 1
- 3c2:	e6 e3       	ldi	r30, 0x36	; 54
+ 3c2:	e5 e1       	ldi	r30, 0x15	; 21
  3c4:	f1 e0       	ldi	r31, 0x01	; 1
  3c6:	83 e0       	ldi	r24, 0x03	; 3
  3c8:	01 90       	ld	r0, Z+
@@ -1050,12 +1056,6 @@ int main(void)
 		port_led_blink(2); 
  3d6:	82 e0       	ldi	r24, 0x02	; 2
  3d8:	3c d0       	rcall	.+120    	; 0x452 <port_led_blink>
-	#else
-		//round up by default
-		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
-	#endif
-
-	__builtin_avr_delay_cycles(__ticks_dc);
  3da:	8f ef       	ldi	r24, 0xFF	; 255
  3dc:	99 e6       	ldi	r25, 0x69	; 105
  3de:	a8 e1       	ldi	r26, 0x18	; 24
@@ -1083,7 +1083,7 @@ int main(void)
 	char str[] = {"OK"}; 
  3f2:	de 01       	movw	r26, r28
  3f4:	11 96       	adiw	r26, 0x01	; 1
- 3f6:	e6 e3       	ldi	r30, 0x36	; 54
+ 3f6:	e5 e1       	ldi	r30, 0x15	; 21
  3f8:	f1 e0       	ldi	r31, 0x01	; 1
  3fa:	83 e0       	ldi	r24, 0x03	; 3
  3fc:	01 90       	ld	r0, Z+

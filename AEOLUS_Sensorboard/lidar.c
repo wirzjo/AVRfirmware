@@ -24,6 +24,8 @@
 
 
 #include "I2C.h"
+#include "config.h"
+#include <avr/delay.h>
 //#include "serial.h"
 
 /************************************************************************/
@@ -172,7 +174,7 @@ uint16_t lidar_get_distance(void) {
  */ 
 bool write_register(uint8_t reg, uint8_t data) {
 	
-	serial_send_string("WRITE..."); 
+	//serial_send_string("WRITE..."); 
 	
 	//Start the I2C Master interface. 
 	//We want to write a register => access-type is WRITE 
@@ -180,7 +182,7 @@ bool write_register(uint8_t reg, uint8_t data) {
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 		
-		serial_send_string("can not write"); 
+		//serial_send_string("can not write"); 
 		I2C_stop();
 		
 		return false; 
@@ -197,7 +199,8 @@ bool write_register(uint8_t reg, uint8_t data) {
 		I2C_stop(); 
 	}
 	
-	serial_send_string("EOF write"); 
+	//serial_send_string("EOF write");
+	_delay_ms(100);  
 	
 	//Everything is OK => return true
 	return true; 
