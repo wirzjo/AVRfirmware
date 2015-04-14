@@ -253,7 +253,7 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 		} else {
 			//I2C Master Interface is started => we can read the bytes from the slave 
 			
-			serial_send_string(" try to read"); 
+			//serial_send_string(" try to read"); 
 			
 			//Read one or two bytes from the Slave 
 			if(numofbytes == 1) {
@@ -264,9 +264,9 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 				//Two bytes are to be read 
 				
 				arraytosafe[0] = I2C_read_byte();		//Read first byte 
-				serial_send_string(" read first byte"); 
+				//serial_send_string(" read first byte"); 
 				arraytosafe[1] = I2C_read_byte();		//Read second byte <=> last byte 
-				serial_send_string(" read second byte");  
+				//serial_send_string(" read second byte");  
 			} else {
 				I2C_stop(); 
 				

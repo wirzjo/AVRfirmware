@@ -82,24 +82,17 @@
  */ 
 bool I2C_init(uint32_t bitrate) {
 	
-	//TWBR = ((F_CPU/bitrate)-16)/2;
-	/*if (TWBR < 11) {
-		return true;
-	}*/
+	//Init the I2C bitrate and prescaler   
+	TWSR = 0;                       //no prescaler => presaclaer = 1
+	TWBR = ((F_CPU/BITRATE)-16)/2;  //should be >10 for stable operation 
 	
-	
-	  /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
-	  
-	TWSR = 0;                       /* no prescaler */
-	TWBR = ((F_CPU/BITRATE)-16)/2;  /* must be > 10 for stable operation */
-	
+	//Check if TWBR is high enough (>10)
 	if(TWBR>10) {
 		return true; 
 	}		
-		
-	return false;
-	//return true; 
 	
+	//Some error occured => return false 	
+	return false;
 }
 
 
