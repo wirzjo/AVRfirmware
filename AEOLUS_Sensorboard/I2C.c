@@ -127,12 +127,12 @@ bool I2C_start(uint8_t address, uint8_t access) {
 	TWDR = address;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	
-	serial_send_string("  sent address"); 
+	//serial_send_string("  sent address"); 
 
 	// wail until transmission completed and ACK/NACK has been received
 	while(!(TWCR & (1<<TWINT)));
 	
-	serial_send_string("  received ack"); 
+	//serial_send_string("  received ack"); 
 
 	// check value of TWI Status Register. Mask prescaler bits.
 	twst = TW_STATUS & 0xF8;
