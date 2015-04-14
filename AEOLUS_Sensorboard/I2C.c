@@ -116,19 +116,14 @@ bool I2C_start(uint8_t address, uint8_t access) {
 	// send START condition
 	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
 
-	//serial_send_string("wait for Slave...");
-
 	// wait until transmission completed
 	while(!(TWCR & (1<<TWINT)));
-	
-	//serial_send_string("...found!");
 
 	// check value of TWI Status Register. Mask prescaler bits.
 	twst = TW_STATUS & 0xF8;
 	if ( (twst != TW_START) && (twst != TW_REP_START)) return false;
 
 	//send device address
-	//TWDR = address;
 	TWDR = address;
 	TWCR = (1<<TWINT) | (1<<TWEN);
 	
@@ -175,12 +170,12 @@ bool I2C_write_byte(uint8_t byte) {
 	TWDR = byte;
 	TWCR = (1<<TWINT)|(1<<TWEN);
 	
-	serial_send_string("  write byte...");
+	//serial_send_string("  write byte...");
 	
 	//Wait until transmission completed
 	while (!(TWCR & (1<<TWINT)));
 	
-	serial_send_string("  byte written!"); 
+	//serial_send_string("  byte written!"); 
 
 	//Check value of TWI Status Register. Mask prescalor bits
 	twst = TWSR & 0xF8;
