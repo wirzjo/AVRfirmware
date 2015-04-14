@@ -24,12 +24,13 @@
 
 
 #include "I2C.h"
+//#include "serial.h"
 
 /************************************************************************/
 /* V A R I A B L E S                                                    */
 /************************************************************************/
 
-#define BITRATE 100000		//100kHz maximum Bitrate 
+#define BITRATE 100000L		//100kHz maximum Bitrate 
 #define SLAVE_ADDR 0x62		//Slave address 
 
 #define WRITE 0				//Write access to the register 
@@ -95,6 +96,14 @@ bool lidar_init(void) {
 	//Reset the lidar to defaults for Distance Measurements 
 	status = status && write_register(I_COMMAND_REG, 0x00); 
 	
+	//if(I2C_start(SLAVE_ADDR,WRITE)) {
+	//	port_led_blink(2); 
+	//	return true; 
+	//} 
+	
+	//if(I2C_start(SLAVE_ADDR,WRITE)) {
+	//	return true; 
+	//}
 	
 	//Return the status after all initialization is done
 	return status; 
@@ -110,6 +119,11 @@ bool lidar_init(void) {
 uint16_t lidar_get_distance(void) {
 	uint8_t result[2]; 
 	
+	if(!write_register(0x00,0x04)) {
+		serial_send_string("error measure"); 
+		return 0; 
+	}
+	
 	//Read the Distance from the Register using I2C
 	if(!read_register(0x0f,2,result)) {
 		//The reading of the registers was NOT successful 
@@ -117,6 +131,24 @@ uint16_t lidar_get_distance(void) {
 		
 		return 0; 
 	}
+	/*if(!read_register(0x0f,1,&result[0])) {
+		serial_send_string("first byte error"); 
+		return 0; 
+	}
+	
+	if(!read_register(0x10,1,&result[1])) {
+		serial_send_string("second byte error"); 
+		return 0; 
+	}*/
+	
+	
+	//Send result to serial terminal 
+	
+	serial_send_byte('A'); 
+	serial_send_byte(result[0]); 
+	serial_send_byte(result[1]);
+	serial_send_byte('\n');
+	serial_send_byte(0x0D);  
 	
 	//We read two 8bit values => convert to a 16bit value
 	return ((result[0] << 8) | result[1]);  
@@ -140,12 +172,15 @@ uint16_t lidar_get_distance(void) {
  */ 
 bool write_register(uint8_t reg, uint8_t data) {
 	
+	serial_send_string("WRITE..."); 
+	
 	//Start the I2C Master interface. 
 	//We want to write a register => access-type is WRITE 
-	if(!I2C_start (SLAVE_ADDR, WRITE)) {
+	if(!I2C_start (0xC4, WRITE)) {
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 		
+		serial_send_string("can not write"); 
 		I2C_stop();
 		
 		return false; 
@@ -162,6 +197,8 @@ bool write_register(uint8_t reg, uint8_t data) {
 		I2C_stop(); 
 	}
 	
+	serial_send_string("EOF write"); 
+	
 	//Everything is OK => return true
 	return true; 
 }
@@ -176,17 +213,22 @@ bool write_register(uint8_t reg, uint8_t data) {
  */
 bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 	
+	serial_send_string("READ..."); 
+	
 	//Start the I2C Master interface
 	//We want tor write a register first => access-type is WRITE 
-	if(!I2C_start(SLAVE_ADDR, WRITE)) {
+	if(!I2C_start(0xC4, WRITE)) {
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 				
 		I2C_stop();
 		
+		serial_send_string("I2C Error");
+		
 		return false; 
 	} else {
 		//I2C Master Interface is started => we can transfer the bytes to the slave
+		serial_send_string("send Bytes"); 
 		
 		//If two consecutive registers should be read, the address must contain a 1 as bit7
 		if(numofbytes == 2) {
@@ -199,26 +241,32 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 		
 		//Start the I2C Master interface
 		//This time we want tor read a register => access-type is READ
-		if(!I2C_start(SLAVE_ADDR, READ)) {
+		if(!I2C_start(0xC5, READ)) {
 			//I2C could not be started => nothing we can do against this, might flag unhappy... 
 			//Anyway, stop the I2C Master interface 
 			
 			I2C_stop(); 
 			
+			serial_send_string("Error: no read");
+			
 			return false; 
 		} else {
 			//I2C Master Interface is started => we can read the bytes from the slave 
+			
+			serial_send_string(" try to read"); 
 			
 			//Read one or two bytes from the Slave 
 			if(numofbytes == 1) {
 				//Only one byte is to be read 
 				
-				arraytosafe[0] = I2C_read_last_byte(); //The first byte is the last byte
+				arraytosafe[0] = I2C_read_byte(); //The first byte is the last byte
 			} else if(numofbytes == 2) {
 				//Two bytes are to be read 
 				
 				arraytosafe[0] = I2C_read_byte();		//Read first byte 
-				arraytosafe[1] = I2C_read_last_byte();	//Read second byte <=> last byte  
+				serial_send_string(" read first byte"); 
+				arraytosafe[1] = I2C_read_byte();		//Read second byte <=> last byte 
+				serial_send_string(" read second byte");  
 			} else {
 				I2C_stop(); 
 				
@@ -229,6 +277,8 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 			I2C_stop(); 
 		}
 	}
+	
+	serial_send_string("EOF read"); 
 	
 	//Everything is OK => return true
 	return true; 

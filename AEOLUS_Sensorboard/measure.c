@@ -94,7 +94,7 @@ void measure_step(void) {
 
 
 /**
- * Filter the measured data and try to find outliers 
+ * Filter the measured data and try to find outliers, obstacles respectively
  * 
  * 
  */

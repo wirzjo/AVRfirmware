@@ -13,12 +13,17 @@
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
 
+#include "config.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <avr/io.h>
+#include <compat/twi.h>
 
-#include "config.h"
 #include "I2C.h"
+#include "port.h"
+//#include "serial.h"
+
+#include <avr/delay.h>
 
 
 
@@ -66,6 +71,8 @@
 
 
 
+#define BITRATE 100000L		//100kHz maximum Bitrate
+
 
 /**
  * Init the use of I2C 
@@ -75,12 +82,23 @@
  */ 
 bool I2C_init(uint32_t bitrate) {
 	
-	TWBR = ((F_CPU/bitrate)-16)/2;
-	if (TWBR < 11) {
+	//TWBR = ((F_CPU/bitrate)-16)/2;
+	/*if (TWBR < 11) {
 		return true;
-	}
+	}*/
+	
+	
+	  /* initialize TWI clock: 100 kHz clock, TWPS = 0 => prescaler = 1 */
+	  
+	TWSR = 0;                       /* no prescaler */
+	TWBR = ((F_CPU/BITRATE)-16)/2;  /* must be > 10 for stable operation */
+	
+	if(TWBR>10) {
+		return true; 
+	}		
 		
 	return false;
+	//return true; 
 	
 }
 
@@ -93,30 +111,37 @@ bool I2C_init(uint32_t bitrate) {
  * @param access: read or write (1 = read, 0 = write) 
  */
 bool I2C_start(uint8_t address, uint8_t access) {
-	uint8_t		twst;
-	
-	//Send Start-Condition 
-	TWCR = (1<<TWINT)|(1<<TWSTA)|(1<<TWEN);
+	uint8_t   twst;
 
-	//Wait unit the transmission of the start-condition is completed 
-	while (!(TWCR & (1<<TWINT)));
+	// send START condition
+	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
 
-	//Check the value of the TWI status register, mask the prescalor bits
-	twst = TWSR & 0xF8;
-	if ((twst != TWI_START) && (twst != TWI_REP_START)) return false;
+	//serial_send_string("wait for Slave...");
 
-	//Send the device address and the access-type (read/write) 
-	TWDR = (address<<1) + access;
-	TWCR = (1<<TWINT)|(1<<TWEN);
+	// wait until transmission completed
+	while(!(TWCR & (1<<TWINT)));
 	
-	//Wait until transmission is completed and a ACK/NACK is received 
-	while (!(TWCR & (1<<TWINT)));
+	//serial_send_string("...found!");
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	if ( (twst != TW_START) && (twst != TW_REP_START)) return false;
+
+	//send device address
+	//TWDR = address;
+	TWDR = address;
+	TWCR = (1<<TWINT) | (1<<TWEN);
 	
-	//Check value of TWI Status Register. Mask prescalor bits.
-	twst = TWSR & 0xF8;
-	if ((twst != TWI_MTX_ADR_ACK) && (twst != TWI_MRX_ADR_ACK)) {
-		return false;
-	}		
+	serial_send_string("  sent address"); 
+
+	// wail until transmission completed and ACK/NACK has been received
+	while(!(TWCR & (1<<TWINT)));
+	
+	serial_send_string("  received ack"); 
+
+	// check value of TWI Status Register. Mask prescaler bits.
+	twst = TW_STATUS & 0xF8;
+	//if ( (twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK) ) return false;	
 
 	return true;
 }
@@ -129,11 +154,11 @@ bool I2C_start(uint8_t address, uint8_t access) {
  */
 void I2C_stop(void) {
 	
-	//Send stop-condition 
-	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWSTO);
-
-	//Wait until the bus is released 
-	while (TWCR & (1<<TWINT));
+    //Send Stop condition 
+    TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+    
+    // wait until stop condition is executed and bus released
+    while(TWCR & (1<<TWSTO));
 }	
 
 
@@ -150,9 +175,13 @@ bool I2C_write_byte(uint8_t byte) {
 	TWDR = byte;
 	TWCR = (1<<TWINT)|(1<<TWEN);
 	
+	serial_send_string("  write byte...");
+	
 	//Wait until transmission completed
 	while (!(TWCR & (1<<TWINT)));
 	
+	serial_send_string("  byte written!"); 
+
 	//Check value of TWI Status Register. Mask prescalor bits
 	twst = TWSR & 0xF8;
 	if (twst != TWI_MTX_DATA_ACK) {
@@ -170,8 +199,11 @@ bool I2C_write_byte(uint8_t byte) {
  */
 uint8_t I2C_read_byte(void) {
 	
+	serial_send_string("  read byte..."); 
 	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWEA);
 	while (!(TWCR & (1<<TWINT)));
+
+	serial_send_string("  byte read"); 
 
 	return TWDR;
 }

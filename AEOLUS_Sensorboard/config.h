@@ -21,7 +21,7 @@
 
 
 /** CPU-Frequency [Hz] */
-#define F_CPU 8000000 
+#define F_CPU 8000000L 
 
 
 

@@ -7,8 +7,10 @@
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch> 
  */ 
 
+#include "config.h"
 #include <avr/io.h>
 #include <stdbool.h>
+#include <avr/delay.h>
 #include "port.h"
 
 
@@ -44,5 +46,16 @@ void port_led(bool state) {
 		PORTB |= (1<<PB0); 
 	} else {
 		PORTB &= ~(1<<PB0); 
+	}
+}
+
+void port_led_blink(uint8_t times) {
+	while(times>0) {
+		port_led(true); 
+		_delay_ms(300); 
+		port_led(false);
+		_delay_ms(200);
+		
+		times -= 1; 
 	}
 }

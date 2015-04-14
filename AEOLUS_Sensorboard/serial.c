@@ -10,11 +10,12 @@
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
 
+#include "config.h"
 #include <stdbool.h>
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/delay.h>
 
-#include "config.h"
 #include "serial.h"
 #include "pixhawk.h"
 
@@ -56,7 +57,7 @@ bool serial_init(unsigned int baud) {
 	
 
 	//Calculate the baudrate
-	uint8_t ubrr = (double)(F_CPU/16/baud-1);  //Note change 16 to 8 for double speed mode 
+	unsigned int ubrr = (double)(F_CPU/16/baud-1);  //Note change 16 to 8 for double speed mode 
 	
 	//Set baudrate 
 	UBRR0H = (unsigned char)(ubrr>>8); 
@@ -68,6 +69,9 @@ bool serial_init(unsigned int baud) {
 	//Set frame format: 8data, 2stop bit 
 	UCSR0C = (1<<USBS0)|(3<<UCSZ00); 
 	
+	
+	//Wait a moment to Set registers 
+	_delay_ms(1000); 
 	
 	//Everything is OK => return true
 	return true; 
@@ -86,6 +90,23 @@ void serial_send_byte(uint8_t data) {
 	
 	//Put data into the buffer and send it 
 	UDR0 = data; 
+}
+
+void serial_send_string(char buf[]) {
+	
+	uint8_t ind; 
+	ind = 0; 
+	
+	//char buf[] = {"Jonas"}; 
+	
+	while(buf[ind] != 0x00) {
+		serial_send_byte(buf[ind]); 
+		ind=ind+1;
+	}
+	  
+	serial_send_byte('\n'); 
+	serial_send_byte(0x0D);	//Send new line 
+	
 }
 
 

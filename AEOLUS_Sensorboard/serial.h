@@ -15,4 +15,7 @@ bool serial_init(unsigned int baud);
 /* @brief Send a byte using the serial interface */ 
 void serial_send_byte(uint8_t data);
 
+/* @brief Send a string using the serial interface */
+void serial_send_string(char buf[]); 
+
 #endif /* SERIAL_H_ */
