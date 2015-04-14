@@ -213,7 +213,7 @@ bool write_register(uint8_t reg, uint8_t data) {
  */
 bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 	
-	serial_send_string("READ..."); 
+	//serial_send_string("READ..."); 
 	
 	//Start the I2C Master interface
 	//We want tor write a register first => access-type is WRITE 
@@ -223,12 +223,12 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 				
 		I2C_stop();
 		
-		serial_send_string("I2C Error");
+		//serial_send_string("I2C Error");
 		
 		return false; 
 	} else {
 		//I2C Master Interface is started => we can transfer the bytes to the slave
-		serial_send_string("send Bytes"); 
+		//serial_send_string("send Bytes"); 
 		
 		//If two consecutive registers should be read, the address must contain a 1 as bit7
 		if(numofbytes == 2) {
@@ -247,7 +247,7 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 			
 			I2C_stop(); 
 			
-			serial_send_string("Error: no read");
+			//serial_send_string("Error: no read");
 			
 			return false; 
 		} else {
@@ -278,7 +278,7 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 		}
 	}
 	
-	serial_send_string("EOF read"); 
+	//serial_send_string("EOF read"); 
 	
 	//Everything is OK => return true
 	return true; 
