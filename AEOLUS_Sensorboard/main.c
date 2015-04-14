@@ -71,7 +71,7 @@ int main(void)
 		
 		
 		port_led_blink(2); 
-		_delay_ms(1000);  
+		//_delay_ms(1000);  
 		
 		
 		uint16_t dist = lidar_get_distance();
@@ -79,27 +79,6 @@ int main(void)
 		char buffer[10]; 
 		sprintf(buffer,"Dist: %d",dist);
 		serial_send_string(buffer);
-		
-		
-		//serial_send_byte('\n'); //Send a Line-Feed 
-		//serial_send_byte(0x0D);
-		
-		
-		//Toggle LED => show that program is running  
-		//port_led(true);
-		//_delay_ms(1000); 
-		
-		
-		//Send a byte to the pixhawk using the serial interface in every loop 
-		//serial_send_byte(0x41); //Send a capital A 
-		//serial_send_byte(0x42); //Send a capital B  
-		
-		//Get the distance from the LIDAR
-		//lidar_get_distance(); 
-		
-		
-		//port_led(false); 
-		//_delay_ms(1000); 
 		
 		
 		

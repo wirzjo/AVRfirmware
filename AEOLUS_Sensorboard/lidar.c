@@ -126,6 +126,8 @@ uint16_t lidar_get_distance(void) {
 		return 0; 
 	}
 	
+	_delay_ms(10); 
+	
 	//Read the Distance from the Register using I2C
 	if(!read_register(0x0f,2,result)) {
 		//The reading of the registers was NOT successful 
@@ -200,7 +202,7 @@ bool write_register(uint8_t reg, uint8_t data) {
 	}
 	
 	//serial_send_string("EOF write");
-	_delay_ms(100);  
+	//_delay_ms(3);  
 	
 	//Everything is OK => return true
 	return true; 
