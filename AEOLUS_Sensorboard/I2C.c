@@ -194,11 +194,11 @@ bool I2C_write_byte(uint8_t byte) {
  */
 uint8_t I2C_read_byte(void) {
 	
-	serial_send_string("  read byte..."); 
+	//serial_send_string("  read byte..."); 
 	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWEA);
 	while (!(TWCR & (1<<TWINT)));
 
-	serial_send_string("  byte read"); 
+	//serial_send_string("  byte read"); 
 
 	return TWDR;
 }
