@@ -100,7 +100,7 @@ bool pixhawk_init(void) {
 	
 	
 	//Init the serial communication 
-	serial_init(9600); 
+	serial_init(38400); 
 	
 	
 	return true; 
@@ -253,7 +253,7 @@ void pixhawk_handler(void) {
 
 	if(flag_send) {
 		//Data needs to be sent 
-		port_led_blink(2);
+		//port_led_blink(2);
 		
 		//serial_send_byte(cmd); 
 		send2pixhawk(cmd); 
@@ -287,6 +287,11 @@ bool send2pixhawk(uint8_t cmd) {
 	//Send individual data 
 	switch(cmd) {
 		case CMD_OBSTACLES: {
+			
+			//Send number of bytes that will be transmitted 
+			serial_send_byte(state.numofobstacles*2);	
+			
+			//Send the data for the obstacles 
 			uint8_t i; 
 			for(i = 0; i<state.numofobstacles; i++) {
 				//serial_send_byte((uint8_t)(state.obstacles[i].bearing>>8));  //High byte of bearing
@@ -298,13 +303,25 @@ bool send2pixhawk(uint8_t cmd) {
 			break; 
 		}
 		case CMD_NUMOBSTACLES: {
+			
+			//Send the number of bytes that will be transmitted
+			serial_send_byte(0x01); 
+			
+			//Send the number of Obstacles 
 			serial_send_byte(state.numofobstacles);
 			
 			break; 
 		}
 		case CMD_LASTDIST: {
 			//Return the last measured distance by the LIDAR in two bytes (high-byte first) 
-			uint16_t dist = lidar_get_distance(); 
+			
+			//Send the number of bytes that will be transmitted 
+			serial_send_byte(0x02); 
+			
+			//Get the distance from the LIDAR
+			uint16_t dist = lidar_get_distance();
+			
+			//Send the distance as high and low byte to the Pixhawk 
 			serial_send_byte((uint8_t)(dist>>8)); 
 			serial_send_byte((uint8_t)(dist)); 
 			
