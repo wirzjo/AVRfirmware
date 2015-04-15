@@ -139,7 +139,7 @@ bool I2C_start(uint8_t address, uint8_t access) {
 			//We received NACK => the device is busy => we continue polling it 
 			//serial_send_string("   LIDAR busy!");
 			
-			/* device busy, send stop condition to terminate write operation */
+			//device busy, send stop condition to terminate write operation
 			TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
 		
 			// wait until stop condition is executed and bus released

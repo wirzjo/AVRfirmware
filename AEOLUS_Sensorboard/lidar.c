@@ -105,15 +105,6 @@ bool lidar_init(void) {
 	//Reset the lidar to defaults for Distance Measurements 
 	status = status && write_register(I_COMMAND_REG, 0x00); 
 	
-	//if(I2C_start(SLAVE_ADDR,WRITE)) {
-	//	port_led_blink(2); 
-	//	return true; 
-	//} 
-	
-	//if(I2C_start(SLAVE_ADDR,WRITE)) {
-	//	return true; 
-	//}
-	
 	//Return the status after all initialization is done
 	return status; 
 }
@@ -250,6 +241,9 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 		//Send the register address to be read
 		I2C_write_byte(reg); 
 		
+		//Stop the Interface 
+		I2C_stop();
+		
 		//Start the I2C Master interface
 		//This time we want tor read a register => access-type is READ
 		if(!I2C_start(SLAVE_ADDR, READ)) {
@@ -278,16 +272,20 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 				//serial_send_string(" read first byte"); 
 				arraytosafe[1] = I2C_read_byte();		//Read second byte <=> last byte 
 				//serial_send_string(" read second byte");  
+				
+				//Stop the Master Interface for Reading 
+				//I2C_stop(); 
 			} else {
 				I2C_stop(); 
 				
 				return false; 
 			}
 			
-			//Stop the Master-interface
+			//Stop the Master-interface for Writing 
 			I2C_stop(); 
-		}
-	}
+		} //END OF I2C_READ
+		
+	} //END OF I2C_WRITE
 	
 	//serial_send_string("EOF read"); 
 	
