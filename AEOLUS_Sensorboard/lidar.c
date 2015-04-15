@@ -143,7 +143,7 @@ uint16_t lidar_measure(void) {
 	state.last_distance = ((result[0] << 8) | result[1]);
  
 	
-	serial_send_string("LIDAR OK!"); 
+	//serial_send_string("LIDAR OK!"); 
 	//Return the current distance 
 	return state.last_distance;  
 	
