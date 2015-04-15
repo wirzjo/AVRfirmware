@@ -35,8 +35,8 @@
 #define BITRATE 100000L		//100kHz maximum Bitrate 
 #define SLAVE_ADDR 0x62		//Slave address 
 
-#define WRITE 0				//Write access to the register 
-#define READ 1				//Read access to the register 
+#define WRITE 0			//Write access to the register 
+#define READ 1			//Read access to the register 
 
 
 static struct {
@@ -186,7 +186,7 @@ bool write_register(uint8_t reg, uint8_t data) {
 	
 	//Start the I2C Master interface. 
 	//We want to write a register => access-type is WRITE 
-	if(!I2C_start (0xC4, WRITE)) {
+	if(!I2C_start (SLAVE_ADDR, WRITE)) {
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 		
@@ -228,7 +228,7 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 	
 	//Start the I2C Master interface
 	//We want tor write a register first => access-type is WRITE 
-	if(!I2C_start(0xC4, WRITE)) {
+	if(!I2C_start(SLAVE_ADDR, WRITE)) {
 		//I2C could not be started => nothing we can do against this, might flag unhappy...
 		//Anyway, stop the I2C Master interface
 				
@@ -252,7 +252,7 @@ bool read_register(uint8_t reg, uint8_t numofbytes, uint8_t arraytosafe[2]) {
 		
 		//Start the I2C Master interface
 		//This time we want tor read a register => access-type is READ
-		if(!I2C_start(0xC5, READ)) {
+		if(!I2C_start(SLAVE_ADDR, READ)) {
 			//I2C could not be started => nothing we can do against this, might flag unhappy... 
 			//Anyway, stop the I2C Master interface 
 			

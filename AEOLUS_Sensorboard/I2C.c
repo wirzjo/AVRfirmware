@@ -124,7 +124,7 @@ bool I2C_start(uint8_t address, uint8_t access) {
 
 		//send device address
 		//address = address | access;
-		TWDR = address;
+		TWDR = ((address<<1) | access);
 		TWCR = (1<<TWINT) | (1<<TWEN);
 
 		// wail until transmission completed and ACK/NACK has been received
