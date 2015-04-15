@@ -119,6 +119,9 @@ bool pixhawk_parse(uint8_t data) {
 	//A message from the Pixhawk must have the following form: 
 	// 0x02 | 0x02 | 0xXX (Command byte) | 0x03 
 	
+	//Turn on LED to signal Data transfer 
+	port_led(true); 
+	
 	switch(rx_state) {
 		case IDLE: {
 			//The state machine is idle and waits for chars to be sent 
@@ -203,7 +206,7 @@ bool pixhawk_parse(uint8_t data) {
 			if(data == MSG_END) {
 				//We received the End Character => Data is valid 
 				
-				port_led_blink(1); 
+				//port_led_blink(1); 
 				
 				flag_send = true; 
 				
@@ -229,6 +232,10 @@ bool pixhawk_parse(uint8_t data) {
 			break; 
 		}
 	}
+	
+	//Unlit LED
+	port_led(false); 
+	
 	
 	return true; 
 }
