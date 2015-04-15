@@ -24,12 +24,18 @@
 bool servo_init(void) {
 	
 	DDRD |= 0xFF;		//Set DDRD as output 
-	TCCR1A |= (1<<WGM11) | (1<<COM1A1);		
+	TCCR1A |= (1<<WGM11) | (1<<COM1A1);	//Set mode 
+	
+	//Set Wave-Form of PWM 	
 	TCCR1B |= 1<<WGM13 | 1<<WGM12 | 1<<CS10;
+	
+	TCCR1B |= (1<<CS11);	//Use Prescalor of 8 => FCPU/8
+	TCCR1B &= ~(1<<CS10); 
+	TCCR1B &= ~(1<<CS12); 
 	
 	//Set maximum Timer-Count 
 	// ICR1 = F_CPU/(Servo acceptable Value in Hz); 
-	ICR1 = 15999; 
+	ICR1 = 19999; 
 
 	//Init the Servo and make sure it starts in 90° Position. 
 	servo_set(90); 
@@ -46,7 +52,7 @@ bool servo_init(void) {
  */
 void servo_set(float deg) {
     
-	uint16_t pwm =  ICR1 - ((maxPWM-minPWM)/180.0f*deg + minPWM);
+	uint16_t pwm = ((maxPWM-minPWM)/180.0f*deg + minPWM);
 	
 	//Saturate PWM output
 	if(pwm<minPWM) {
@@ -57,5 +63,5 @@ void servo_set(float deg) {
 		pwm = maxPWM;
 	}
 	
-	OCR1A = pwm; 
+	OCR1A = ICR1 - pwm; 
 }

@@ -27,6 +27,7 @@
 #include "lidar.h"
 #include "serial.h"
 #include "pixhawk.h"
+#include "measure.h"
 
 #include <util/delay.h>
 
@@ -84,6 +85,12 @@ int main(void) {
 			//***MEASUREMENTS WITH THE LIDAR  
 			// 
 			measure_handler(); 
+			
+			//servo_set(0); 
+			//_delay_ms(1000); 
+			//servo_set(180); 
+			//_delay_ms(1000);
+			
 		
 		
 			//port_led_blink(2); 

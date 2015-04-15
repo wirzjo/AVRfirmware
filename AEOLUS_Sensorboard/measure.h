@@ -12,8 +12,11 @@
 /* @brief Do a measurement by controlling the Sensor and do Distance measurements using the LIDAR */ 
 void measure_new(void); 
 
-/* @brief Handle reptetitive tasks for measurement */ 
+/* @brief Handle repetitive tasks for measurement */ 
 void measure_handler(void); 
+
+/* @brief Init the measurement */ 
+bool measure_init(void);
 
 
 

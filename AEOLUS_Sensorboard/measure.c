@@ -19,9 +19,9 @@
 static uint8_t obst_prob[RANGE*2/INTERVAL]; 
 static uint16_t last_center; 
 
-struct {
+static struct {
 	uint16_t angle;		//Current angle to be checked => starboard border is 0°
-	uint8_t direction;	//Increasing or Decreasing of the angle (starboard --> backboard = 1; backboard --> starboard = -1)
+	int8_t direction;	//Increasing or Decreasing of the angle (starboard --> backboard = 1; backboard --> starboard = -1)
 	uint16_t last_center; //Center angle for which the data in the array is valid 
 	uint16_t curr_center; //Current center known from the Pixhawk 
 } state = {
@@ -40,7 +40,7 @@ void filter(uint16_t *dist);
  * => Move the Servo to Starboard
  *
  */
-void measure_init(void) {
+bool measure_init(void) {
 	
 	//Move the Servo to start-position 
 	servo_set(0); 
@@ -51,6 +51,7 @@ void measure_init(void) {
 	//Set the direction (Starboard to Backboard) 
 	state.direction = 1; 
 	
+	return true; 
 }
 
 
@@ -64,11 +65,12 @@ void measure_init(void) {
  */
 void measure_handler(void) {
 	
-	
+	/*
 	uint16_t dist = lidar_measure();
 	_delay_ms(500); 
+	*/
+
 	
-	/*
 	//Check if we already finished one round 
 	if(state.angle>=2*RANGE) {
 		//We are at the end => on backbord-side 
@@ -87,16 +89,18 @@ void measure_handler(void) {
 	
 	//MOVE THE SERVO TO THE NEW ANGLE 
 	servo_set(state.angle * SERVOFACTOR); 
+	_delay_ms(100); 
 	
 	//DO THE MEASUREMENT  
 	uint16_t dist = lidar_measure();
+	//uint16_t dist = 20; 
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
 	filter(&dist); 
 	
 	//Increase the Angle 
-	state.angle += state.direction * INTERVAL; 	
-	*/
+	state.angle += (state.direction * INTERVAL); 	
+	
 }
 
 

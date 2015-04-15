@@ -17,7 +17,7 @@
 
 /** RANGE [°]
  * Angle between boat middle axis and end of sector for measurement */ 
-#define RANGE 100 
+#define RANGE 90 
 
 
 /** CPU-Frequency [Hz] */
