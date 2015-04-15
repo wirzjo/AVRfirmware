@@ -170,34 +170,22 @@ bool pixhawk_parse(uint8_t data) {
 		}
 		case HEAD0: {
 			//The command was sent => expect to receive the "heading0" char 
-			
-			if(data == MSG_START || data == MSG_END) {
-				//We received again a Start or End Character or a 0 => ERROR
-				//return to IDLE
-				
-				rx_state = IDLE;
-			} else {
-				//The char is valid => store it
-				head0 = data; 
-				rx_state = HEAD1;
-			}
+			//NOTE: We do not check, if we received a start or an End-Char, because it could happen that the heading contains one of these characters 
+
+			//The char is valid => store it
+			head0 = data; 
+			rx_state = HEAD1;
 			
 			break; 
 		}
 		case HEAD1: {
 			//The first heading byte was receives => expect to receive the second one 
+			//NOTE: We do not check, if we received a start or an End-Char, because it could happen that the heading contains one of these characters 
 			
-			if(data == MSG_START || data == MSG_END) {
-				//We received again a Start or End Character or a 0 => ERROR
-				//return to IDLE
-				
-				rx_state = IDLE;
-			} else {
-				//The char is valid => store it
-				head1 = data;
-				rx_state = ENDCHAR;
-			}
-			
+			//The char is valid => store it
+			head1 = data;
+			rx_state = ENDCHAR;
+						
 			break; 
 		}
 		case ENDCHAR: {
@@ -205,8 +193,6 @@ bool pixhawk_parse(uint8_t data) {
 			
 			if(data == MSG_END) {
 				//We received the End Character => Data is valid 
-				
-				//port_led_blink(1); 
 				
 				flag_send = true; 
 				
