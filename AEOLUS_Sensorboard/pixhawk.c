@@ -11,13 +11,18 @@
  *    0x02 | 0x02 | Command-Byte | heading0 | heading1 | 0x03
  *    Note: heading0 and heading1 are the high and the low byte of the heading wrt. true north of the boat 
  * 2) Answer to a read request 
- *    0x02 | 0x02 | Command-Byte | ...variable length of data bytes dependent on the command... | 0x03
+ *    0x02 | 0x02 | Command-Byte | number of bytes |...variable length of data bytes dependent on the command... | 0x03
  *
  *
  *
  * Created: 02.04.2015 11:56:17
  *  Author: Jonas Wirz <wirzjo@student.ethz.ch>
  */ 
+
+/* 
+ * TODO: 
+ *   - Do not check, if we received Start or End-char when the heading bytes are sent! 
+ */
 
 
 #include <stdbool.h>
@@ -56,7 +61,7 @@ static bool flag_send = false;
 
 
 /************************************************************************/
-/* P R O T O C O L L                                                    */
+/* P R O T O C O L                                                      */
 /************************************************************************/
 
 #define MSG_START		0x02	//Start character for a message
