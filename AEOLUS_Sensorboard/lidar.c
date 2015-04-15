@@ -124,6 +124,10 @@ uint16_t lidar_measure(void) {
 		return 0; 
 	}
 	
+	//This delay is needed accoring to the LIDAR I2C Protocol. The Module will respond with a NACK, if a read or 
+	//write request is sent using I2C. 
+	//TODO: Maybe it is possible to do something else in this time...maybe move the Servo...(dangerous, because then the servo could eventually move 
+	//during an ongoing Measurement! 
 	_delay_ms(20); //Note: This delay is very important! (as soon as it is removed, the software crashes at some point!) 
 	
 	//Read the Distance from the Register using I2C

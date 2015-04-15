@@ -72,7 +72,8 @@
 
 
 #define BITRATE 100000L		//100kHz maximum Bitrate
-
+#define TIMEOUT 100         //Number or times I2C retries to get a connection before a timeout occures => prevents the I2C from beeing blocking 
+static uint8_t timeout = 0; //Number of times I2C actually tried to get a connection 
 
 /**
  * Init the use of I2C 
@@ -104,6 +105,9 @@ bool I2C_init(uint32_t bitrate) {
  * @param access: read or write (1 = read, 0 = write) 
  */
 bool I2C_start(uint8_t address, uint8_t access) {
+	
+	timeout = 0; //Reset the number of retries 
+	
 	uint8_t   twst;
 	
 	//serial_send_string(" I2C Start...\n"); 
@@ -114,7 +118,13 @@ bool I2C_start(uint8_t address, uint8_t access) {
 		TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
 
 		// wait until transmission completed
-		while(!(TWCR & (1<<TWINT)));
+		while(!(TWCR & (1<<TWINT))) {
+			timeout++; 
+			
+			if(timeout>TIMEOUT) {
+				return false; 
+			}
+		}
 		
 		//serial_send_string("   transmission completed"); 
 
@@ -128,7 +138,13 @@ bool I2C_start(uint8_t address, uint8_t access) {
 		TWCR = (1<<TWINT) | (1<<TWEN);
 
 		// wail until transmission completed and ACK/NACK has been received
-		while(!(TWCR & (1<<TWINT)));
+		while(!(TWCR & (1<<TWINT))){
+			timeout++;
+			
+			if(timeout>TIMEOUT) {
+				return false;
+			}
+		}
 		
 		//serial_send_string("   ACK/NACK received"); 
 
@@ -143,7 +159,13 @@ bool I2C_start(uint8_t address, uint8_t access) {
 			TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
 		
 			// wait until stop condition is executed and bus released
-			while(TWCR & (1<<TWSTO));
+			while(TWCR & (1<<TWSTO)) {
+				timeout++;
+				
+				if(timeout>TIMEOUT) {
+					return false;
+				}
+			}				
 		
 			continue;
 		}
@@ -164,11 +186,19 @@ bool I2C_start(uint8_t address, uint8_t access) {
  */
 void I2C_stop(void) {
 	
+	timeout = 0; //Reset the number of retries 
+	
     //Send Stop condition 
     TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
     
     // wait until stop condition is executed and bus released
-    while(TWCR & (1<<TWSTO));
+    while(TWCR & (1<<TWSTO)) {
+		timeout++;
+		
+		if(timeout>TIMEOUT) {
+			return false;
+		}
+	}
 }	
 
 
@@ -179,6 +209,9 @@ void I2C_stop(void) {
  * @param bytes 
  */
 bool I2C_write_byte(uint8_t byte) {
+	
+	timeout = 0; //Reset the number of retries 
+	
 	uint8_t   twst;
 	
 	//Send data to the previously addressed device
@@ -188,7 +221,13 @@ bool I2C_write_byte(uint8_t byte) {
 	//serial_send_string("  write byte...");
 	
 	//Wait until transmission completed
-	while (!(TWCR & (1<<TWINT)));
+	while (!(TWCR & (1<<TWINT))) {
+		timeout++;
+		
+		if(timeout>TIMEOUT) {
+			return false;
+		}
+	}
 	
 	//serial_send_string("  byte written!"); 
 
@@ -209,9 +248,17 @@ bool I2C_write_byte(uint8_t byte) {
  */
 uint8_t I2C_read_byte(void) {
 	
+	timeout = 0; //Reset the number of retries 
+	
 	//serial_send_string("  read byte..."); 
 	TWCR = (1<<TWINT)|(1<<TWEN)|(1<<TWEA);
-	while (!(TWCR & (1<<TWINT)));
+	while (!(TWCR & (1<<TWINT))) {
+		timeout++;
+		
+		if(timeout>TIMEOUT) {
+			return false;
+		}
+	}
 
 	//serial_send_string("  byte read"); 
 
@@ -226,8 +273,16 @@ uint8_t I2C_read_byte(void) {
  */
 uint8_t I2C_read_last_byte(void) {
 	
+	timeout = 0; //Reset the number of retries 
+	
 	TWCR = (1<<TWINT)|(1<<TWEN);
-	while(!(TWCR & (1<<TWINT)));
+	while(!(TWCR & (1<<TWINT))) {
+		timeout++;
+		
+		if(timeout>TIMEOUT) {
+			return false;
+		}
+	}
 	
 	return TWDR;
 }

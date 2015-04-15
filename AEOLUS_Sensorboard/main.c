@@ -30,8 +30,7 @@
 
 #include <util/delay.h>
 
-int main(void)
-{
+int main(void) {
 	
 	/************************************************************************/
 	/* BOOT                                                                 */
@@ -39,27 +38,28 @@ int main(void)
 	
 	bool boot_state = true;		//true, if everything is fine during the boot process 
 	
-	//Disable any Interrupt 
+	//Disable any Interrupts 
 	cli(); 
 	
 	//Init the input/output ports 
 	boot_state = boot_state && port_init(); 
 	
 	//Init the use of a Servo
-	//boot_state = boot_state && servo_init(); 
+	boot_state = boot_state && servo_init(); 
 	
 	//Init the use of the LIDAR 
 	boot_state = boot_state && lidar_init();     //DEBUG: Remove true, this is only, because no lidar is present by now 
 	
 	//Init the use of the Pixhawk 
-	pixhawk_init();					//DEBUG: add this init ot the bool boot_state
+	boot_state = boot_state && pixhawk_init();					//DEBUG: add this init ot the bool boot_state
 	
 	//Init the measurement 
-	measure_init(); 
+	boot_state = boot_state && measure_init(); 
 	
 	//Allow for Interrupts (e.g. for serial communication) 
 	sei(); 
 	
+	//Write a message to the serial interface, that the boot-process was successful
 	char str[] = {"OK"}; 
 	serial_send_string(str); 
 	
@@ -67,31 +67,43 @@ int main(void)
 	/************************************************************************/
 	/* MAIN WHILE LOOP                                                      */
 	/************************************************************************/
-    while(boot_state)
-    {
-		/* Note this main while-loop is only started if all Sensors are initialized successfully 
-		 * Otherwise for safety reasons the main loop is not started at all */ 
+    while(1) {
+		
+		if(boot_state) {
+			//The handlers and other regular tasks are only executed if the boot-process was successful
+			//this is for safety reasons! 
 		
 		
-		//Send data to Pixhawk 
-		pixhawk_handler(); 
+			//***SEND DATA TO PIXHAWK 
+			//The Pixhawk requests for data by sending commands. These commands are processed in the 
+			//Interrupt routine of the UART. 
+			//The answer to a request is sent when we have time in the pixhawk_handler(). 
+			pixhawk_handler(); 
 		
 		
-		//Do Measurements 
-		measure_handler(); 
+			//***MEASUREMENTS WITH THE LIDAR  
+			// 
+			measure_handler(); 
 		
 		
-		//port_led_blink(2); 
-		//_delay_ms(1000);  
+			//port_led_blink(2); 
+			//_delay_ms(1000);  
 		
 		
 		
-		//DISPLAY THE LIDAR DISTANCE IN SERIAL INTERFACE
-		//uint16_t dist = lidar_get_distance();
+			//DISPLAY THE LIDAR DISTANCE IN SERIAL INTERFACE
+			//uint16_t dist = lidar_get_distance();
 		
-		//char buffer[10]; 
-		//sprintf(buffer,"Dist: %d",dist);
-		//serial_send_string(buffer);
+			//char buffer[10]; 
+			//sprintf(buffer,"Dist: %d",dist);
+			//serial_send_string(buffer);
 		
-    }
-}
+		} else {
+			//Something went wrong during the boot-process => signal this state with a LED being constantly on
+			
+			port_led(true); 
+		} //if boot_state 
+		
+	} //while(1)
+	
+} //main(void)
