@@ -100,8 +100,8 @@ bool pixhawk_init(void) {
 	
 	
 	//Init the serial communication 
-	serial_init(38400); 
-	
+	//serial_init(38400);	//for use with PIXHAWK
+	serial_init(19200); 
 	
 	return true; 
 }

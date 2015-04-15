@@ -133,7 +133,7 @@ uint16_t lidar_measure(void) {
 		return 0; 
 	}
 	
-	_delay_ms(100); 
+	_delay_ms(20); //Note: This delay is very important! (as soon as it is removed, the software crashes at some point!) 
 	
 	//Read the Distance from the Register using I2C
 	if(!read_register(0x0f,2,result)) {
@@ -148,6 +148,7 @@ uint16_t lidar_measure(void) {
 	state.last_distance = ((result[0] << 8) | result[1]);
  
 	
+	serial_send_string("LIDAR OK!"); 
 	//Return the current distance 
 	return state.last_distance;  
 	
@@ -206,7 +207,7 @@ bool write_register(uint8_t reg, uint8_t data) {
 		I2C_stop(); 
 	}
 	
-	//serial_send_string("EOF write");
+	//serial_send_string("Write OK");
 	//_delay_ms(3);  
 	
 	//Everything is OK => return true

@@ -105,50 +105,54 @@ bool I2C_init(uint32_t bitrate) {
  */
 bool I2C_start(uint8_t address, uint8_t access) {
 	uint8_t   twst;
-
-while(true) {
-
-	// send START condition
-	TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
-
-	// wait until transmission completed
-	while(!(TWCR & (1<<TWINT)));
-
-	// check value of TWI Status Register. Mask prescaler bits.
-	twst = TW_STATUS & 0xF8;
-	if ( (twst != TW_START) && (twst != TW_REP_START)) return false;
-
-	//send device address
-	TWDR = address;
-	TWCR = (1<<TWINT) | (1<<TWEN);
 	
-	//serial_send_string("  sent address"); 
+	//serial_send_string(" I2C Start...\n"); 
 
-	// wail until transmission completed and ACK/NACK has been received
-	while(!(TWCR & (1<<TWINT)));
-	
-	//serial_send_string("  checking status..."); 
+	while(true) {
 
-	// check value of TWI Status Register. Mask prescaler bits.
-	twst = TW_STATUS & 0xF8;
-	//if ( (twst != TW_MT_SLA_ACK) && (twst != TW_MR_SLA_ACK) ) return false;	
-	
-	if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) )
-	{
-		/* device busy, send stop condition to terminate write operation */
-		TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+		// send START condition
+		TWCR = (1<<TWINT) | (1<<TWSTA) | (1<<TWEN);
+
+		// wait until transmission completed
+		while(!(TWCR & (1<<TWINT)));
 		
-		// wait until stop condition is executed and bus released
-		while(TWCR & (1<<TWSTO));
+		//serial_send_string("   transmission completed"); 
+
+		// check value of TWI Status Register. Mask prescaler bits.
+		twst = TW_STATUS & 0xF8;
+		if ( (twst != TW_START) && (twst != TW_REP_START)) return false;
+
+		//send device address
+		//address = address | access;
+		TWDR = address;
+		TWCR = (1<<TWINT) | (1<<TWEN);
+
+		// wail until transmission completed and ACK/NACK has been received
+		while(!(TWCR & (1<<TWINT)));
 		
-		continue;
+		//serial_send_string("   ACK/NACK received"); 
+
+		// check value of TWI Status Register. Mask prescaler bits.
+		twst = TW_STATUS & 0xF8;	
+	
+		if ( (twst == TW_MT_SLA_NACK )||(twst ==TW_MR_DATA_NACK) ) {
+			//We received NACK => the device is busy => we continue polling it 
+			//serial_send_string("   LIDAR busy!");
+			
+			/* device busy, send stop condition to terminate write operation */
+			TWCR = (1<<TWINT) | (1<<TWEN) | (1<<TWSTO);
+		
+			// wait until stop condition is executed and bus released
+			while(TWCR & (1<<TWSTO));
+		
+			continue;
+		}
+		//serial_send_string(" ...start OK! ");
+
+		break;
 	}
-	//if( twst != TW_MT_SLA_ACK) return 1;
-	break;
-	
-}
 
-//serial_send_string("...end!\n"); 
+	//serial_send_string("...end!\n"); 
 	return true;
 }
 
