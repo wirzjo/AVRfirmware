@@ -30,6 +30,7 @@
 #include "config.h"
 #include "pixhawk.h"
 #include "serial.h"
+#include "measure.h"
 
 
 /************************************************************************/
@@ -253,6 +254,12 @@ void pixhawk_handler(void) {
 		
 		cmd = 0x00;
 		flag_send = false;  
+		
+		#if DEBUG_MATLAB == 1
+		//Do the next measurement step
+		measure_handler();  
+		#endif 
+		
 	}
 }
 

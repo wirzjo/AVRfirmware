@@ -42,6 +42,7 @@ int main(void) {
 	//Disable any Interrupts 
 	cli(); 
 	
+	
 	//Init the input/output ports 
 	boot_state = boot_state && port_init(); 
 	
@@ -59,6 +60,7 @@ int main(void) {
 	
 	//Allow for Interrupts (e.g. for serial communication) 
 	sei(); 
+	
 	
 	//Write a message to the serial interface, that the boot-process was successful
 	char str[] = {"OK"}; 
@@ -84,12 +86,18 @@ int main(void) {
 		
 			//***MEASUREMENTS WITH THE LIDAR  
 			// 
+			#if DEBUG_MATLAB == 0
 			measure_handler(); 
+			#endif
 			
-			//servo_set(0); 
-			//_delay_ms(1000); 
-			//servo_set(180); 
-			//_delay_ms(1000);
+			/*servo_set(0); 
+			_delay_ms(1000);
+			_delay_ms(1000);
+			_delay_ms(1000); 
+			servo_set(180); 
+			_delay_ms(1000);
+			_delay_ms(1000);
+			_delay_ms(1000);*/
 			
 		
 		

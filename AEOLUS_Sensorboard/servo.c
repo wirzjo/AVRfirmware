@@ -14,8 +14,9 @@
 #include "config.h"
 #include "servo.h"
 
-#define minPWM 550		//most left position, say 0°
-#define maxPWM 2350     //most right position, say 180°
+#define minPWM 500		//most left position, say 0° (550) [PWM]
+#define maxPWM 2400     //most right position, say 180° (2350) [PWM]
+#define ServoRange 210	//Number of Degrees from fully left to fully right [°]
 
 
 /** 
@@ -37,8 +38,9 @@ bool servo_init(void) {
 	// ICR1 = F_CPU/(Servo acceptable Value in Hz); 
 	ICR1 = 19999; 
 
-	//Init the Servo and make sure it starts in 90° Position. 
-	servo_set(90); 
+	//Init the Servo and make sure it starts in middle Position 
+	OCR1A = ICR1 - (maxPWM-minPWM)/2 + minPWM; 
+	//servo_set(90); 
 	
 	return true; 
 }
@@ -52,7 +54,7 @@ bool servo_init(void) {
  */
 void servo_set(float deg) {
     
-	uint16_t pwm = ((maxPWM-minPWM)/180.0f*deg + minPWM);
+	uint16_t pwm = ((maxPWM-minPWM)/ServoRange*deg + minPWM);
 	
 	//Saturate PWM output
 	if(pwm<minPWM) {

@@ -25,4 +25,9 @@
 
 
 
+/** DEBUG FLAGS */
+#define DEBUG_MATLAB 1 //Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
+
+
+
 #endif /* CONFIG_H_ */

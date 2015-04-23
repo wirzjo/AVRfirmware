@@ -17,6 +17,7 @@
 					  //If 2*RANGE is bigger than this, we must reduce the servo angle and increase it mechanically! 
 
 static uint8_t obst_prob[RANGE*2/INTERVAL]; 
+static uint8_t distances[RANGE*2/INTERVAL]; 
 static uint16_t last_center; 
 
 static struct {
