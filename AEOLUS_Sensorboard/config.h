@@ -12,7 +12,7 @@
 #define CONFIG_H_
 
 /** INTERVAL [°]
- * Angle between two distance measurements in degrees */ 
+ * Angle between two distance measurements in degrees (smallest interval possible is 1, integer types only) */ 
 #define INTERVAL 2 
 
 /** RANGE [°]
@@ -26,7 +26,7 @@
 
 
 /** DEBUG FLAGS */
-#define DEBUG_MATLAB 1 //Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
+#define DEBUG_MATLAB 1//Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
 
 
 

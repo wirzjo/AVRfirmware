@@ -128,7 +128,7 @@ uint16_t lidar_measure(void) {
 	//write request is sent using I2C. 
 	//TODO: Maybe it is possible to do something else in this time...maybe move the Servo...(dangerous, because then the servo could eventually move 
 	//during an ongoing Measurement! 
-	_delay_ms(20); //Note: This delay is very important! (as soon as it is removed, the software crashes at some point!) 
+	_delay_ms(30); //Note: This delay is very important! (as soon as it is removed, the software crashes at some point!) 
 	
 	//Read the Distance from the Register using I2C
 	if(!read_register(0x0f,2,result)) {

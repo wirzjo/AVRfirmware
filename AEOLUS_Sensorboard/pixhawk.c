@@ -26,6 +26,7 @@
 
 
 #include <stdbool.h>
+#include <avr/delay.h>
 
 #include "config.h"
 #include "pixhawk.h"
@@ -72,6 +73,7 @@ static bool flag_send = false;
 								//Note: bearing (high/low byte) and then the distance is sent
 #define CMD_NUMOBSTACLES 0x4E   //Number of obstacles currently in range 
 #define CMD_LASTDIST    0x4A    //Latest known distance from the LIDAR 	
+#define CMD_RESET       0x20    //Reset the Sensor to initial conditions 
 
 
 
@@ -276,6 +278,22 @@ void pixhawk_handler(void) {
  * @param 
  */
 bool send2pixhawk(uint8_t cmd) {
+	
+	//First handle all Commands that do not need to send data back 
+	switch(cmd) {
+		case CMD_RESET: {
+			//Reset the Sensor to initial conditions 
+			
+			measure_init(); 
+			return true;  
+		}
+		default: {
+			//If we reach this point, the command requires to send some data 
+		}		
+	}
+	
+	
+	
 	
 	//Send start-sequence 
 	serial_send_byte(MSG_START);

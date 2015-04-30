@@ -90,7 +90,7 @@ int main(void) {
 			measure_handler(); 
 			#endif
 			
-			/*servo_set(0); 
+			/*servo_set(0);  //525 was ok
 			_delay_ms(1000);
 			_delay_ms(1000);
 			_delay_ms(1000); 
@@ -99,10 +99,22 @@ int main(void) {
 			_delay_ms(1000);
 			_delay_ms(1000);*/
 			
+			/*uint8_t i; 
+			for(i=0;i<180;i=i+5) {
+				servo_set(i); 
+				_delay_ms(200); 
+			}
+			
+						_delay_ms(1000);
+						_delay_ms(1000);
+						_delay_ms(1000);
+									_delay_ms(1000);
+									_delay_ms(1000);
+									_delay_ms(1000);
 		
 		
 			//port_led_blink(2); 
-			//_delay_ms(1000);  
+			//_delay_ms(1000);  */
 		
 		
 		

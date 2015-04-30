@@ -16,8 +16,8 @@
 #define SERVOFACTOR 1 //Factor the Angle has to be decreased for the Servo => the servo has a maximum range of -90°,90° <=> 0°,180°
 					  //If 2*RANGE is bigger than this, we must reduce the servo angle and increase it mechanically! 
 
-static uint8_t obst_prob[RANGE*2/INTERVAL]; 
-static uint8_t distances[RANGE*2/INTERVAL]; 
+static uint8_t obst_prob[(uint8_t)(RANGE*2/INTERVAL)]; 
+static uint8_t distances[(uint8_t)(RANGE*2/INTERVAL)]; 
 static uint16_t last_center; 
 
 static struct {

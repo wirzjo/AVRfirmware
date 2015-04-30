@@ -10,13 +10,15 @@
  */ 
 
 #include <avr/io.h>
+#include <avr/delay.h>
 
 #include "config.h"
 #include "servo.h"
 
-#define minPWM 500		//most left position, say 0° (550) [PWM]
-#define maxPWM 2400     //most right position, say 180° (2350) [PWM]
-#define ServoRange 210	//Number of Degrees from fully left to fully right [°]
+#define ServoRange 180				 //Number of Degrees from fully left to fully right [°]
+
+#define minPWM 575  //575
+#define maxPWM 2375 //withoud LIDAR: 2348, with LIDAR: 2375
 
 
 /** 
@@ -39,8 +41,25 @@ bool servo_init(void) {
 	ICR1 = 19999; 
 
 	//Init the Servo and make sure it starts in middle Position 
-	OCR1A = ICR1 - (maxPWM-minPWM)/2 + minPWM; 
-	//servo_set(90); 
+	//OCR1A = ICR1 - (maxPWM-minPWM)/2 + minPWM; 
+	//OCR1A = ICR1 - minPWM; 
+	//servo_set(180);
+	
+	//OCR1A = ICR1 - middlePWM;  
+	OCR1A = ICR1 - minPWM; 
+	
+	/*_delay_ms(1000); 
+	_delay_ms(1000); 
+	_delay_ms(1000); 
+	_delay_ms(1000); 
+	OCR1A = ICR1 - minPWM; 
+	
+	_delay_ms(1000);
+	_delay_ms(1000);
+	_delay_ms(1000);
+	_delay_ms(1000);
+	OCR1A = ICR1 - maxPWM; */
+	
 	
 	return true; 
 }
@@ -66,4 +85,6 @@ void servo_set(float deg) {
 	}
 	
 	OCR1A = ICR1 - pwm; 
+	
+	//OCR1A = ICR1 - deg; 
 }
