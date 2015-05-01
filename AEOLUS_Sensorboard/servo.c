@@ -10,15 +10,27 @@
  */ 
 
 #include <avr/io.h>
-#include <avr/delay.h>
+#include <util/delay.h>
 
 #include "config.h"
 #include "servo.h"
 
-#define ServoRange 180				 //Number of Degrees from fully left to fully right [°]
+#define ServoRange 180	 //Number of Degrees from fully left to fully right [°]
+#define ServoSpeed 2     //Speed of the Servo [ms/°]
 
-#define minPWM 575  //575
-#define maxPWM 2375 //withoud LIDAR: 2348, with LIDAR: 2375
+#define minPWM 575		//575
+#define maxPWM 2375		//without LIDAR: 2348, with LIDAR: 2375
+
+static struct {
+	uint16_t angle; 
+} state = {
+	.angle = 0
+};
+
+
+/* @brief Wait for a given amount of Milliseconds */ 
+void wait(uint16_t time);
+
 
 
 /** 
@@ -73,7 +85,18 @@ bool servo_init(void) {
  */
 void servo_set(float deg) {
     
+	//Calculate the PWM Signal 
 	uint16_t pwm = ((maxPWM-minPWM)/ServoRange*deg + minPWM);
+	
+	//Time for moving to this position 
+	int16_t ang_diff = state.angle-deg; 
+	if(ang_diff < 0) {
+		ang_diff = -ang_diff; 
+	}
+	uint16_t time = ang_diff/ServoSpeed;	
+	
+	//Store the angle locally
+	state.angle = deg;
 	
 	//Saturate PWM output
 	if(pwm<minPWM) {
@@ -86,5 +109,18 @@ void servo_set(float deg) {
 	
 	OCR1A = ICR1 - pwm; 
 	
+	//Wait for the servo to reach the new position 
+	wait(time); 
+	
 	//OCR1A = ICR1 - deg; 
+}
+
+
+
+
+
+void wait(uint16_t time) {
+	for(uint16_t i=0; i<time; i++) {
+		_delay_ms(1); 
+	}
 }

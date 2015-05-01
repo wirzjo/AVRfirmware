@@ -29,5 +29,8 @@ bool pixhawk_parse(uint8_t data);
 /* @brief Handle repetitive tasks */  
 void pixhawk_handler(void);
 
+/* @brief Get the last knonw Heading of the boat */ 
+uint16_t pixhawk_get_heading(void); 
+
 
 #endif /* PIXHAWK_H_ */
