@@ -126,8 +126,8 @@ uint16_t lidar_measure(void) {
 	
 	//This delay is needed accoring to the LIDAR I2C Protocol. The Module will respond with a NACK, if a read or 
 	//write request is sent using I2C. 
-	//TODO: Maybe it is possible to do something else in this time...maybe move the Servo...(dangerous, because then the servo could eventually move 
-	//during an ongoing Measurement! 
+	//Maybe it is possible to do something else in this time...
+	//But be careful. Moving the Servo in this time can lead to a wrong measurement! 
 	_delay_ms(30); //Note: This delay is very important! (as soon as it is removed, the software crashes at some point!) 
 	
 	//Read the Distance from the Register using I2C
@@ -142,6 +142,16 @@ uint16_t lidar_measure(void) {
 	//Since we read a new distance from the Sensor, we can store it as the local state 
 	state.last_distance = ((result[0] << 8) | result[1]);
  
+ 
+	//Check the result: s
+	//The LIDAR returns zero, if the measurement was NOT successful. This means that no object is detected inside the measurement range of the LIDAR.
+	//In such a case set the measured distance to the maximum range in order to not confuse the filtering process. 
+	if(state.last_distance == 0) {
+		//The LIDAR did not detect anything inside the measurement range => we assign the maximum range 
+		
+		state.last_distance = LIDAR_MAX_DISTANCE; 
+	}
+	
 	
 	//serial_send_string("LIDAR OK!"); 
 	//Return the current distance 

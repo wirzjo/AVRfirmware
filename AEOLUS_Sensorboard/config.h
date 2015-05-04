@@ -24,6 +24,11 @@
 #define F_CPU 8000000L 
 
 
+/** LIDAR MAX DISTANCE RANGE [cm] 
+ * Maximum Distance the LIDAR can measure. Above this distance the LIDAR returns zero */ 
+#define LIDAR_MAX_DISTANCE 700 //25m
+
+
 
 /** DEBUG FLAGS */
 #define DEBUG_MATLAB 1//Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
