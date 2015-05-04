@@ -18,6 +18,9 @@ void measure_handler(void);
 /* @brief Init the measurement */ 
 bool measure_init(void);
 
+/* @brief Return the identified obstacles from the buffer */ 
+bool measure_get_obstacles(uint16_t *angle, uint16_t *dist);
+
 
 
 #endif /* MEASURE_H_ */

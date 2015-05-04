@@ -8,24 +8,15 @@
  */ 
 
 #include "buffer.h"
-#include <stdint.h>
-#include <stdbool.h>
 
 
-/** @brief Init a circular Buffer of a given Size*/
-CircularBuffer buffer_init(uint8_t buffersize);
 
 /** @brief Update the Size of an existing Circular Buffer */
 bool buffer_updateSize(CircularBuffer *buffer, uint8_t buffersize);
 
-/** @brief Add a value to the Buffer */
-bool buffer_add(CircularBuffer *buffer, float value);
-
 /** @brief Delete the oldest value from the Buffer */
 bool buffer_delete_oldest(CircularBuffer *buffer);
 
-/** @brief Get the value at a given buffer position */
-float buffer_get_value(CircularBuffer *buffer, uint8_t pos);
 
 
 
@@ -105,14 +96,14 @@ bool buffer_add(CircularBuffer *buffer, uint16_t value1, uint16_t value2) {
 	if (next != buffer->tail) {
 		//The buffer is not full => add value to the buffer
 
-		buffer->bufferData1_p[buffer->head] = value;
-		buffer->bufferData2_p[buffer->head] = value;
+		buffer->bufferData1_p[buffer->head] = value1;
+		buffer->bufferData2_p[buffer->head] = value2;
 		buffer->head = next;
 		buffer->buffersize += 1;
 	} else {
 		//The buffer is full => delete oldest element and add the new value
 		buffer_delete_oldest(buffer);
-		buffer_add(buffer,value);
+		buffer_add(buffer,value1,value2);
 	}
 
 	return true;
@@ -144,19 +135,44 @@ bool buffer_delete_oldest(CircularBuffer *buffer) {
 
 
 /**
- * Get the value1 at a certain position in the buffer
+ * Get the values that are at the head of the buffer, then "delete" this element 
  *
  * Note: This function does not check if the element exists! It always returns a value,
  * even it lays outside of the buffer (due to the circularity).
  *
  * @param  *buffer: Pointer to a Circluar Buffer
  * @param  pos: Position in the buffer
+ * @param  value1: Value at pos from the first column
+ * @param  value2: Value at pos from the second column 
  * @return the value at the given position in the buffer
  */
-uint16_t buffer_get_value1(CircularBuffer *buffer, uint8_t pos, uint16_t ) {
+bool buffer_get_values(CircularBuffer *buffer, uint16_t *value1, uint16_t *value2) {
 
-	uint8_t ind = (uint8_t)(buffer->tail + pos) % buffer->maxBuffersize;
+	//uint8_t ind = (uint8_t)(buffer->tail + pos) % buffer->maxBuffersize;
+	
+	//Return the 
+	uint8_t ind = buffer->head; 
 
-	return buffer->bufferData_p[ind];
+	*value1 = buffer->bufferData1_p[ind];
+	*value2 = buffer->bufferData2_p[ind]; 
+	
+	return buffer_delete_oldest(buffer); 
 
 } //End of buffer_getValue
+
+
+/**
+ * Get the state of the buffer. 
+ *
+ * @param buffer: Pointer to a circular buffer
+ * @return true, iff the buffer is empty, false else 
+ */
+bool buffer_is_empty(CircularBuffer *buffer) {
+	
+	if(buffer->head == buffer->tail) {
+		return true; 
+	} else {
+		return false; 
+	}
+	
+}

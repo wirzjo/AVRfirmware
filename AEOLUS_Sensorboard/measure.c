@@ -13,6 +13,7 @@
 #include "lidar.h"
 #include "servo.h"
 #include "serial.h"
+#include "buffer.h"
 
 
 //static uint8_t obst_prob[(uint8_t)(RANGE*2/INTERVAL)]; 
@@ -41,6 +42,9 @@ static struct {
 } config = {
 	.threshold = 20
 };
+
+static CircularBuffer buffer;	//Circular Buffer holding the detected obstacles 
+
 
 
 /* @brief Filter the data and try to find outliers */ 
@@ -220,6 +224,8 @@ void filter(void) {
 		if(sum1 > config.threshold) {
 			//We found an obstacle => store it in the dynamic buffer 
 			
+			buffer_add(&buffer,head_mat[ind],dist_mat[ind]);
+			
 			port_led_blink(1); 
 		}		
 	
@@ -239,11 +245,31 @@ void filter(void) {
 }
 
 
+/** 
+ * Get the obstacles from the Buffer
+ * 
+ * @param angle: Pointer to the angle, where the obstacle is detected (wrt. true North) [°]
+ * @param dist:  Pointer to the distance to the obstacle [cm]
+ * @return true, if there are any more obstacles left, false otherwise
+ */
+bool measure_get_obstacles(uint16_t *angle, uint16_t *dist) {
+	
+	//Get the Obstacle-Object from the Buffer
+	buffer_get_values(&buffer, angle, dist); 
+	
+	//Return true as soon as the buffer is empty 
+	return !buffer_is_empty(&buffer); 
+}
+
+
+
 
 
 /**
- * Take the modulo for compass courses 
- *
+ * Take the modulo for compass courses (account for discontinuity at 0°->360°)
+ * 
+ * >360: angle-360
+ * <360: 360-angle
  */
 uint16_t mod(int16_t angle) {
 

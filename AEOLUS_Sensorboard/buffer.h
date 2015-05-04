@@ -12,6 +12,7 @@
 #define BUFFER_H_
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
 /** Struct for a Circluar Buffer */
@@ -24,6 +25,22 @@ typedef struct {
 	uint8_t buffersize;        		//Current size of the buffer
 } CircularBuffer;
 
+
+
+/* @brief Create a new buffer of the given size */ 
+CircularBuffer buffer_init(uint8_t buffersize); 
+
+
+/* @brief Add values to the buffer */ 
+bool buffer_add(CircularBuffer *buffer, uint16_t value1, uint16_t value2); 
+
+
+/* @brief Return the values from a given position in the buffer */
+bool buffer_get_values(CircularBuffer *buffer, uint16_t *value1, uint16_t *value2); 
+
+
+/* @brief Return true, if the buffer is empty */ 
+bool buffer_is_empty(CircularBuffer *buffer); 
 
 
 #endif /* BUFFER_H_ */

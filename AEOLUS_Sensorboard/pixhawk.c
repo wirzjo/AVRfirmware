@@ -295,7 +295,7 @@ bool send2pixhawk(uint8_t cmd) {
 	
 	
 	
-	//Send start-sequence 
+	//Send start-sequence => Initialize Message 
 	serial_send_byte(MSG_START);
 	serial_send_byte(MSG_START);
 	
