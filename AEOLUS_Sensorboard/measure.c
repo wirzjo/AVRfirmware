@@ -41,7 +41,7 @@ static struct {
 static struct {
 	uint8_t threshold; //Threshold above which the correlated value is considered as an obstacle
 } config = {
-	.threshold = 20
+	.threshold = 10
 };
 
 CircularBuffer obst_buffer;	//Circular Buffer holding the detected obstacles 
@@ -105,7 +105,9 @@ void measure_handler(void) {
 		state.angle = 2*RANGE; 
 		state.direction = -1; 
 		
-		filter();		//Filter the data and find the obstacles 
+		#if(DEBUG_FILTER == 0)
+			filter();		//Filter the data and find the obstacles 
+		#endif
 	}
 	
 	if(state.angle<=0) {
@@ -114,7 +116,10 @@ void measure_handler(void) {
 		state.angle = 0; 
 		state.direction = 1; 
 		
-		filter();		//Filter the data and find the obstacles 
+		#if(DEBUG_FILTER == 0)
+			filter();		//Filter the data and find the obstacles 
+		#endif
+		
 	}
 	
 	
@@ -196,18 +201,13 @@ void push2matrix(uint16_t dist) {
  */
 void filter(void) {
 	
+	/*
 	//port_led_blink(2); 
 	
 	//Template for the matching process 
 	int8_t template[5] = {0,-1,0,1,0};
 	#define template_length 5 //Length of the template  
-	#define template_midInd 2 //Middle Index of the template  
-		
-		
-	//DEBUG: Output the distance matrix 
-	/*for(uint16_t ind=0; ind<(360/INTERVAL); ind++) {
-		serial_send_byte((uint8_t)dist_mat[ind]); 
-	}*/			
+	#define template_midInd 2 //Middle Index of the template  		
 		
 	
 	//Correlate the measurement data with the template and rate obstacles 
@@ -244,7 +244,78 @@ void filter(void) {
 	}
 	
 	state.max_tn_angle_ind = 0x0000; 
-	state.min_tn_angle_ind = 0xFFFF; 
+	state.min_tn_angle_ind = 0xFFFF;  */ 
+	
+	
+	//THIS IS THE NEW VERSION WITH START AND END FOR OBSTACLES 
+	#define template_length 3								//Length of the template
+	int8_t template_start[template_length] = {0,-1,0};		//Template for start-sequence
+	int8_t template_end[template_length] = {0,1,0};			//Template for end-sequence
+	
+	#define template_midInd 1 //Middle Index of the template
+		
+		
+	//TODO: Here we need the to calcualte the first derivative of the distances => f(t-1)-f(t) 	
+		
+	
+	bool start = false;		//Flag signaling that a start-sequence was detected 
+	uint16_t start_ind = 0; //Index, where a start-sequence was detected 
+		
+	//Correlate the measurement data with the template and rate obstacles
+	//TODO change this in the way such that only measured headings are taken into account => state.min_index, state.max_index
+	//Check what happens, at discontinuity 0->360°
+	for(uint16_t ind=template_midInd; ind <= (360/INTERVAL)-(template_midInd+1); ind++) {
+		
+		int16_t sum1 = 0;
+		int16_t sum2 = 0; 
+		
+		//Calculate the first derivative for there three values 
+		int16_t derivative[template_length] = {0,0,0}; 
+			
+		derivative[0] = dist_mat[ind-1]-dist_mat[ind];
+		derivative[1] = dist_mat[ind]-dist_mat[ind+1]; 
+		derivative[2] = dist_mat[ind+1]-dist_mat[ind+2];  
+		
+
+		//Correlate the Signal with the templates 
+		for (int8_t t_ind=(-template_midInd); t_ind < template_midInd; t_ind++) {
+			sum1 = sum1 + template_start[t_ind+template_midInd]*(int16_t)derivative[t_ind];
+			sum2 = sum2 + template_end[t_ind+template_midInd]*(int16_t)derivative[t_ind]; 
+		}	
+			
+		//serial_send_byte(((int8_t)(sum1)));
+			
+		//Find local maximum
+		if(sum1 > config.threshold && sum2 < config.threshold) {
+			//We found a possible start-sequence of an obstacle
+			
+			start = true; 
+			start_ind = ind;
+			
+			char str[] = {"START "};
+			serial_send_string(str); 
+		}
+		
+		if(start == true && sum2 > config.threshold && sum1 < config.threshold) {
+			//We found a possible end-sequence that follows after a start-sequence of an obstacle 
+			
+			uint16_t obst_index = (uint16_t)((ind-start_ind)/2) + start_ind; 
+			
+			start = false; 
+			
+			char str[] = {"END "};
+			serial_send_string(str);
+			
+			//Add the obstacle to the buffer 
+			port_led_blink(1);	//DEBUG: Blink once for every detected obstacle 
+			buffer_add(&obst_buffer,obst_index*INTERVAL,dist_mat[ind]);  
+			
+		}	
+			
+	} 
+	
+	
+	
 	
 	
 }
