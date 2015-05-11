@@ -62,6 +62,8 @@ int main(void) {
 	sei(); 
 	
 	
+	
+	
 	//Write a message to the serial interface, that the boot-process was successful
 	char str[] = {"OK"}; 
 	serial_send_string(str); 

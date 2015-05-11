@@ -11,6 +11,8 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#include "buffer.h"
+
 /** INTERVAL [°]
  * Angle between two distance measurements in degrees (smallest interval possible is 1, integer types only) */ 
 #define INTERVAL 2 
@@ -29,9 +31,19 @@
 #define LIDAR_MAX_DISTANCE 700 //25m
 
 
+/** MAX OBSTACLE NUMBER 
+ * Maximum number of obstacles that can be stored */ 
+#define MAX_OBSTACLE_NUMBER 20
+
 
 /** DEBUG FLAGS */
-#define DEBUG_MATLAB 1//Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
+#define DEBUG_MATLAB 1 //Debugging in Matlab. A measurement Step is only done, when the distance data was transferred. 
+#define DEBUG_FLTER 0  //Turn off preprocessing (filtering) of the obstacles before sending them to the Pixhawk 
+
+
+
+/** COMMONLY USED VARIABLES */
+extern CircularBuffer obst_buffer; 
 
 
 

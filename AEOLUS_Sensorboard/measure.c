@@ -14,6 +14,7 @@
 #include "servo.h"
 #include "serial.h"
 #include "buffer.h"
+#include "pixhawk.h"
 
 
 //static uint8_t obst_prob[(uint8_t)(RANGE*2/INTERVAL)]; 
@@ -43,7 +44,7 @@ static struct {
 	.threshold = 20
 };
 
-static CircularBuffer buffer;	//Circular Buffer holding the detected obstacles 
+CircularBuffer obst_buffer;	//Circular Buffer holding the detected obstacles 
 
 
 
@@ -74,6 +75,9 @@ bool measure_init(void) {
 	//Set the direction (Starboard to Backboard) 
 	state.direction = 1; 
 	
+	//Initialize the Buffer
+	obst_buffer = buffer_init(MAX_OBSTACLE_NUMBER); 
+	
 	return true; 
 }
 
@@ -101,7 +105,7 @@ void measure_handler(void) {
 		state.angle = 2*RANGE; 
 		state.direction = -1; 
 		
-		//filter();		//Filter the data and find the obstacles 
+		filter();		//Filter the data and find the obstacles 
 	}
 	
 	if(state.angle<=0) {
@@ -110,7 +114,7 @@ void measure_handler(void) {
 		state.angle = 0; 
 		state.direction = 1; 
 		
-		//filter();		//Filter the data and find the obstacles 
+		filter();		//Filter the data and find the obstacles 
 	}
 	
 	
@@ -223,10 +227,11 @@ void filter(void) {
 		//Find local maximum
 		if(sum1 > config.threshold) {
 			//We found an obstacle => store it in the dynamic buffer 
+		
+			//Add data to the buffer 	
+			buffer_add(&obst_buffer,ind*INTERVAL,dist_mat[ind]);
 			
-			buffer_add(&buffer,head_mat[ind],dist_mat[ind]);
-			
-			port_led_blink(1); 
+			//port_led_blink(1); 
 		}		
 	
 	}
@@ -255,10 +260,10 @@ void filter(void) {
 bool measure_get_obstacles(uint16_t *angle, uint16_t *dist) {
 	
 	//Get the Obstacle-Object from the Buffer
-	buffer_get_values(&buffer, angle, dist); 
+	buffer_get_values(&obst_buffer, angle, dist); 
 	
 	//Return true as soon as the buffer is empty 
-	return !buffer_is_empty(&buffer); 
+	return !buffer_is_empty(&obst_buffer); 
 }
 
 

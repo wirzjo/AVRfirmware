@@ -21,6 +21,7 @@ bool buffer_delete_oldest(CircularBuffer *buffer);
 
 
 
+
 /**
  * Init a new Buffer of a given Size
  *
@@ -151,7 +152,7 @@ bool buffer_get_values(CircularBuffer *buffer, uint16_t *value1, uint16_t *value
 	//uint8_t ind = (uint8_t)(buffer->tail + pos) % buffer->maxBuffersize;
 	
 	//Return the 
-	uint8_t ind = buffer->head; 
+	uint8_t ind = buffer->tail; 
 
 	*value1 = buffer->bufferData1_p[ind];
 	*value2 = buffer->bufferData2_p[ind]; 
@@ -175,4 +176,15 @@ bool buffer_is_empty(CircularBuffer *buffer) {
 		return false; 
 	}
 	
+}
+
+
+/** 
+ * Get the size of the buffer 
+ *
+ * @param buffer: Pointer to the circular buffer
+ * @return size of the buffer 
+ */
+uint8_t buffer_get_size(CircularBuffer *buffer) {
+	return buffer->buffersize; 
 }

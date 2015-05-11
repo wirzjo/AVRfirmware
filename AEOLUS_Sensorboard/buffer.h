@@ -43,4 +43,8 @@ bool buffer_get_values(CircularBuffer *buffer, uint16_t *value1, uint16_t *value
 bool buffer_is_empty(CircularBuffer *buffer); 
 
 
+/* @brief Return the size of the buffer */ 
+uint8_t buffer_get_size(CircularBuffer *buffer);
+
+
 #endif /* BUFFER_H_ */

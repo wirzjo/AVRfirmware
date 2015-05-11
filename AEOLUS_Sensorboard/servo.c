@@ -19,7 +19,7 @@
 #define ServoSpeed 2     //Speed of the Servo [ms/°]
 
 #define minPWM 575		//575
-#define maxPWM 2375		//without LIDAR: 2348, with LIDAR: 2375
+#define maxPWM 2374		//without LIDAR: 2348, with LIDAR: 2375
 
 static struct {
 	uint16_t angle; 

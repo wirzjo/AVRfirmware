@@ -50,7 +50,7 @@ static uint8_t head1 = 0x00;		//Low byte of the heading
 
 static struct {
 	uint8_t numofobstacles;			//Current number of obstacles known 
-	obstacle obstacles[MAXNROFOBSTACLES]; //Obstacles represented as Obstacle-Objects 
+	//obstacle obstacles[MAXNROFOBSTACLES]; //Obstacles represented as Obstacle-Objects 
 	uint16_t heading;				//Current heading of the boat known from Pixhawk 
 } state = {
 	.numofobstacles = 0, 
@@ -305,6 +305,25 @@ bool send2pixhawk(uint8_t cmd) {
 	//Send individual data 
 	switch(cmd) {
 		case CMD_OBSTACLES: {
+			
+			//Send the number of bytes 
+			serial_send_byte(buffer_get_size(&obst_buffer)*4); 
+			//Size is: 2 Values for each obstacle, 2 Bytes for each value => 2x2=4
+			
+			
+			while(!buffer_is_empty(&obst_buffer)) {
+				//As long as there are values in the buffer send the data 
+				
+				uint16_t heading = 0; 
+				uint16_t distance = 0;
+				
+				buffer_get_values(&obst_buffer, &heading, &distance);  
+				
+				serial_send_byte((uint8_t)(heading>>8));  //High byte of bearing
+				serial_send_byte((uint8_t)(heading));		 //Low byte of bearing
+				serial_send_byte((uint8_t)(distance>>8)); //High byte of distance
+				serial_send_byte((uint8_t)(distance));		 //Low byte of distance
+			}
 			
 			//Send number of bytes that will be transmitted 
 			serial_send_byte(state.numofobstacles*2);	
