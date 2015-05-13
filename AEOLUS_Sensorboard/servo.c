@@ -15,11 +15,11 @@
 #include "config.h"
 #include "servo.h"
 
-#define ServoRange 180	 //Number of Degrees from fully left to fully right [°]
+#define ServoRange 180   //Number of Degrees from fully left to fully right [°]
 #define ServoSpeed 2     //Speed of the Servo [ms/°]
 
 #define minPWM 575		//575
-#define maxPWM 2374		//without LIDAR: 2348, with LIDAR: 2375
+#define maxPWM 2375		//without LIDAR: 2348, with LIDAR: 2375
 
 static struct {
 	uint16_t angle; 

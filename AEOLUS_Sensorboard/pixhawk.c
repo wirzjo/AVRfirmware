@@ -49,11 +49,8 @@ static uint8_t head1 = 0x00;		//Low byte of the heading
 
 
 static struct {
-	uint8_t numofobstacles;			//Current number of obstacles known 
-	//obstacle obstacles[MAXNROFOBSTACLES]; //Obstacles represented as Obstacle-Objects 
 	uint16_t heading;				//Current heading of the boat known from Pixhawk 
-} state = {
-	.numofobstacles = 0, 
+} state = { 
 	.heading = 0
 };
 
@@ -71,9 +68,13 @@ static bool flag_send = false;
 
 #define CMD_OBSTACLES	0x4F	//Send the bearings and distances to every obstacle in range
 								//Note: bearing (high/low byte) and then the distance is sent
-#define CMD_NUMOBSTACLES 0x4E   //Number of obstacles currently in range 
-#define CMD_LASTDIST    0x4A    //Latest known distance from the LIDAR 	
+#define CMD_NUMOFSTACLES 0x4E   //Number of obstacles currently in range 
+#define CMD_LASTDIST    0x4A    //Latest known distance from the LIDAR
+#define CMD_DISTMAT1    0x4B    //Return the distance Matrix for 0-179 
+#define CMD_DISTMAT2    0x4C    //Return the distance Matrix for 180-355	
 #define CMD_RESET       0x20    //Reset the Sensor to initial conditions 
+
+#define CMD_SET_THRESH  0x30    //Set the threshold for the obstacle Detection  
 
 
 
@@ -199,8 +200,20 @@ bool pixhawk_parse(uint8_t data) {
 				
 				flag_send = true; 
 				
-				//Store the heading transmitted with the request
-				state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1);
+				//For "SET"-Commands, the heading-bytes contain some variable information 
+				switch(cmd) {
+					case CMD_SET_THRESH: {
+						//Set the threshold of the Obstacle Detection 
+						
+						measure_set_threshold(((uint16_t)(head0<<8) || (uint16_t)(head1)));
+						
+						break; 
+					}
+					default: {
+						//Store the heading transmitted with the request
+						state.heading = (uint16_t)(head0<<8) || (uint16_t)(head1);
+					}									
+				} 
 				
 				rx_state = IDLE; 
 			
@@ -275,7 +288,7 @@ void pixhawk_handler(void) {
 /**
  * Send data to Pixhawk 
  *
- * @param 
+ * @param cmd: Command that was sent last 
  */
 bool send2pixhawk(uint8_t cmd) {
 	
@@ -325,27 +338,15 @@ bool send2pixhawk(uint8_t cmd) {
 				serial_send_byte((uint8_t)(distance));		 //Low byte of distance
 			}
 			
-			//Send number of bytes that will be transmitted 
-			serial_send_byte(state.numofobstacles*2);	
-			
-			//Send the data for the obstacles 
-			uint8_t i; 
-			for(i = 0; i<state.numofobstacles; i++) {
-				//serial_send_byte((uint8_t)(state.obstacles[i].bearing>>8));  //High byte of bearing
-				//serial_send_byte((uint8_t)(state.obstacles[i]&0x00FF));		 //Low byte of bearing
-				//serial_send_byte((uint8_t)(state.obstacles[i].distance>>8)); //High byte of distance 
-				//serial_send_byte((uint8_t)(state.obstacles[i]&0x00FF));		 //Low byte of distance 
-			}
-			
 			break; 
 		}
-		case CMD_NUMOBSTACLES: {
+		case CMD_NUMOFSTACLES: {
 			
 			//Send the number of bytes that will be transmitted
 			serial_send_byte(0x01); 
 			
 			//Send the number of Obstacles 
-			serial_send_byte(state.numofobstacles);
+			serial_send_byte(buffer_get_size(&obst_buffer)); 
 			
 			break; 
 		}
@@ -363,6 +364,32 @@ bool send2pixhawk(uint8_t cmd) {
 			serial_send_byte((uint8_t)(dist)); 
 			
 			break; 
+		}
+		case CMD_DISTMAT1: {
+			//Return the first halfe of the Distance-Matrix 0-179°
+			
+			serial_send_byte(360/INTERVAL); //Number of Bytes 
+			
+			for(uint16_t ind = 0; ind < 360/INTERVAL/2; ind++) {
+				uint16_t dist = measure_get_distance(ind); 
+				serial_send_byte((uint8_t)(dist>>8));
+				serial_send_byte((uint8_t)(dist));
+			}
+			
+			break; 
+		}
+		case CMD_DISTMAT2: {
+			//Return the second half of the Distance-Matrix 180-359°
+			
+			serial_send_byte(360/INTERVAL); //Number of Bytes (2 bytes per distance) 
+			
+			for(uint16_t ind = 360/INTERVAL/2; ind < 360/INTERVAL; ind++) {
+				uint16_t dist = measure_get_distance(ind);
+				serial_send_byte((uint8_t)(dist>>8));
+				serial_send_byte((uint8_t)(dist));
+			}
+			
+			break;
 		}
 		default: {
 			//An invalid command was sent => might flag unhappy...

@@ -188,3 +188,6 @@ bool buffer_is_empty(CircularBuffer *buffer) {
 uint8_t buffer_get_size(CircularBuffer *buffer) {
 	return buffer->buffersize; 
 }
+
+
+

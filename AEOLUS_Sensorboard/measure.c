@@ -19,7 +19,7 @@
 
 //static uint8_t obst_prob[(uint8_t)(RANGE*2/INTERVAL)]; 
 static uint8_t dist_mat[(uint16_t)(360/INTERVAL)];
-static uint16_t head_mat[(uint16_t)(360/INTERVAL)]; 
+//static uint16_t head_mat[(uint16_t)(360/INTERVAL)]; 
 static uint16_t last_center; 
 
 static struct {
@@ -39,7 +39,7 @@ static struct {
 };
 
 static struct {
-	uint8_t threshold; //Threshold above which the correlated value is considered as an obstacle
+	int16_t threshold; //Threshold above which the correlated value is considered as an obstacle
 } config = {
 	.threshold = 10
 };
@@ -78,6 +78,14 @@ bool measure_init(void) {
 	//Initialize the Buffer
 	obst_buffer = buffer_init(MAX_OBSTACLE_NUMBER); 
 	
+	//Init the Distance Matrix with Zero 
+	for(uint16_t i = 0; i<360/INTERVAL; i++) {
+		dist_mat[i] = 0;
+	}
+	
+	//Set the initial threshold
+	config.threshold = 20; 
+	
 	return true; 
 }
 
@@ -99,7 +107,7 @@ void measure_handler(void) {
 
 	
 	//Check if we already finished one round 
-	if(state.angle>=2*RANGE) {
+	if(state.angle >= 2*RANGE) {
 		//We are at the end => on backbord-side 
 		
 		state.angle = 2*RANGE; 
@@ -110,7 +118,7 @@ void measure_handler(void) {
 		#endif
 	}
 	
-	if(state.angle<=0) {
+	if(state.angle <= 0) {
 		//We are at the end => on starboard-side
 		
 		state.angle = 0; 
@@ -123,21 +131,19 @@ void measure_handler(void) {
 	}
 	
 	
-	//MOVE THE SERVO TO THE NEW ANGLE 
-	servo_set(state.angle); 
-	//_delay_ms(100); 
-	
+	//MOVE THE SERVO TO THE NEW ANGLE
+	servo_set(state.angle); 	
+
 	//DO THE MEASUREMENT  
 	uint16_t dist = lidar_measure();
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
 	push2matrix(dist); 
 	
-	//Increase the Angle 
-	state.angle += (state.direction * INTERVAL); 	
+	//Increase the Angle
+	state.angle += (state.direction * INTERVAL);
 	
 }
-
 
 
 /**
@@ -162,7 +168,7 @@ void push2matrix(uint16_t dist) {
 	if(state.angle < RANGE) {
 		//This is plus => to the starboard side of the boat
 	
-		alpha = RANGE-state.angle;
+		alpha = RANGE - state.angle;
 	
 		angle_tn = mod(curr_course + alpha);
 	}
@@ -193,13 +199,52 @@ void push2matrix(uint16_t dist) {
 }	
 
 
+void filter(void) {
+	
+	bool start = false;
+	uint16_t start_ind = 0;  
+	
+	for (uint16_t ind = 1; ind < (360/INTERVAL)-1; ind++) {
+		
+		//Differentiate 
+		int16_t diff = (int16_t)(dist_mat[ind-1] - dist_mat[ind]); 
+		
+		
+		//Find Start of an Obstacle 
+		if(diff >= config.threshold) {
+			start = true; 
+			start_ind = ind; 
+		}
+		
+		//Find End of an Obstacle 
+		if(((-1)*diff) >= config.threshold) {
+			
+			if(start == true) {
+				//We found a valid Obstacle => store it in the Buffer 
+				
+				uint16_t obst_index = (uint16_t)((ind-start_ind)/2) + start_ind;
+				
+				start = false;
+				
+				buffer_add(&obst_buffer,obst_index*INTERVAL,dist_mat[obst_index]);
+			}
+			
+		}
+		
+		
+	} 
+	
+}
+
+
+
 
 /**
  * Filter the data using a template and try to identify obstacles 
  * NOTE: This function is called as soon as a full cycle with the Servo is performed.
  *
  */
-void filter(void) {
+void filter_correlate(void) {
 	
 	/*
 	//port_led_blink(2); 
@@ -292,8 +337,8 @@ void filter(void) {
 			start = true; 
 			start_ind = ind;
 			
-			char str[] = {"START "};
-			serial_send_string(str); 
+			//char str[] = {"START "};
+			//serial_send_string(str); 
 		}
 		
 		if(start == true && sum2 > config.threshold && sum1 < config.threshold) {
@@ -303,11 +348,11 @@ void filter(void) {
 			
 			start = false; 
 			
-			char str[] = {"END "};
-			serial_send_string(str);
+			//char str[] = {"END "};
+			//serial_send_string(str);
 			
 			//Add the obstacle to the buffer 
-			port_led_blink(1);	//DEBUG: Blink once for every detected obstacle 
+			//port_led_blink(1);	//DEBUG: Blink once for every detected obstacle 
 			buffer_add(&obst_buffer,obst_index*INTERVAL,dist_mat[ind]);  
 			
 		}	
@@ -363,5 +408,31 @@ uint16_t mod(int16_t angle) {
 		}
 
 		return angle;
+}	
+
+
+/**
+ * Get the distance at a given angle 
+ *
+ * @param ind: index in the matrix 
+ */
+uint16_t measure_get_distance(uint16_t ind) {
+	
+	return dist_mat[ind]; 
+	
+}	
+
+
+
+/**
+ * Set the threshold for the Obstacle Correlation
+ *
+ * 
+ */
+bool measure_set_threshold(uint16_t threshold) {
+	
+	config.threshold = (int16_t)threshold; 
+	
+	return true; 
 }	
   
