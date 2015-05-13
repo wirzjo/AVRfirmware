@@ -94,7 +94,7 @@ Disassembly of section .text:
       94:	ad 3e       	cpi	r26, 0xED	; 237
       96:	b1 07       	cpc	r27, r17
       98:	e1 f7       	brne	.-8      	; 0x92 <.do_clear_bss_loop>
-      9a:	0e 94 6c 05 	call	0xad8	; 0xad8 <main>
+      9a:	0e 94 6e 05 	call	0xadc	; 0xadc <main>
       9e:	0c 94 16 0a 	jmp	0x142c	; 0x142c <_exit>
 
 000000a2 <__bad_interrupt>:
@@ -2503,7 +2503,7 @@ void pixhawk_handler(void) {
 	if(flag_send) {
      abe:	80 91 db 01 	lds	r24, 0x01DB
      ac2:	88 23       	and	r24, r24
-     ac4:	41 f0       	breq	.+16     	; 0xad6 <pixhawk_handler+0x18>
+     ac4:	51 f0       	breq	.+20     	; 0xada <pixhawk_handler+0x1c>
 		//Data needs to be sent 
 		//port_led_blink(2);
 		
@@ -2516,111 +2516,109 @@ void pixhawk_handler(void) {
      ace:	10 92 d8 01 	sts	0x01D8, r1
 		flag_send = false;  
      ad2:	10 92 db 01 	sts	0x01DB, r1
-     ad6:	08 95       	ret
+		
+		#if DEBUG_MATLAB == 1
+		//Do the next measurement step
+		measure_handler();  
+     ad6:	0e 94 31 04 	call	0x862	; 0x862 <measure_handler>
+     ada:	08 95       	ret
 
-00000ad8 <main>:
+00000adc <main>:
 #include "pixhawk.h"
 #include "measure.h"
 
 #include <util/delay.h>
 
 int main(void) {
-     ad8:	cf 93       	push	r28
-     ada:	df 93       	push	r29
-     adc:	00 d0       	rcall	.+0      	; 0xade <main+0x6>
-     ade:	0f 92       	push	r0
-     ae0:	cd b7       	in	r28, 0x3d	; 61
-     ae2:	de b7       	in	r29, 0x3e	; 62
+     adc:	cf 93       	push	r28
+     ade:	df 93       	push	r29
+     ae0:	00 d0       	rcall	.+0      	; 0xae2 <main+0x6>
+     ae2:	0f 92       	push	r0
+     ae4:	cd b7       	in	r28, 0x3d	; 61
+     ae6:	de b7       	in	r29, 0x3e	; 62
 	/************************************************************************/
 	
 	bool boot_state = true;		//true, if everything is fine during the boot process 
 	
 	//Disable any Interrupts 
 	cli(); 
-     ae4:	f8 94       	cli
+     ae8:	f8 94       	cli
 	
 	
 	//Init the input/output ports 
 	boot_state = boot_state && port_init(); 
-     ae6:	0e 94 a9 05 	call	0xb52	; 0xb52 <port_init>
+     aea:	0e 94 a9 05 	call	0xb52	; 0xb52 <port_init>
 	
 	//Init the use of a Servo
 	boot_state = boot_state && servo_init(); 
-     aea:	88 23       	and	r24, r24
-     aec:	79 f1       	breq	.+94     	; 0xb4c <main+0x74>
-     aee:	0e 94 68 06 	call	0xcd0	; 0xcd0 <servo_init>
-     af2:	88 23       	and	r24, r24
-     af4:	59 f1       	breq	.+86     	; 0xb4c <main+0x74>
+     aee:	88 23       	and	r24, r24
+     af0:	69 f1       	breq	.+90     	; 0xb4c <main+0x70>
+     af2:	0e 94 68 06 	call	0xcd0	; 0xcd0 <servo_init>
+     af6:	88 23       	and	r24, r24
+     af8:	49 f1       	breq	.+82     	; 0xb4c <main+0x70>
 	
 	//Init the use of the LIDAR 
 	boot_state = boot_state && lidar_init();     //DEBUG: Remove true, this is only, because no lidar is present by now 
-     af6:	0e 94 26 02 	call	0x44c	; 0x44c <lidar_init>
-     afa:	88 23       	and	r24, r24
-     afc:	39 f1       	breq	.+78     	; 0xb4c <main+0x74>
+     afa:	0e 94 26 02 	call	0x44c	; 0x44c <lidar_init>
+     afe:	88 23       	and	r24, r24
+     b00:	29 f1       	breq	.+74     	; 0xb4c <main+0x70>
 	
 	//Init the use of the Pixhawk 
 	boot_state = boot_state && pixhawk_init();					//DEBUG: add this init ot the bool boot_state
-     afe:	0e 94 6e 04 	call	0x8dc	; 0x8dc <pixhawk_init>
-     b02:	88 23       	and	r24, r24
-     b04:	19 f1       	breq	.+70     	; 0xb4c <main+0x74>
+     b02:	0e 94 6e 04 	call	0x8dc	; 0x8dc <pixhawk_init>
+     b06:	88 23       	and	r24, r24
+     b08:	09 f1       	breq	.+66     	; 0xb4c <main+0x70>
 	
 	//Init the measurement 
 	boot_state = boot_state && measure_init(); 
-     b06:	0e 94 ae 02 	call	0x55c	; 0x55c <measure_init>
-     b0a:	88 23       	and	r24, r24
-     b0c:	19 f0       	breq	.+6      	; 0xb14 <main+0x3c>
-     b0e:	01 e0       	ldi	r16, 0x01	; 1
-     b10:	10 e0       	ldi	r17, 0x00	; 0
-     b12:	02 c0       	rjmp	.+4      	; 0xb18 <main+0x40>
-     b14:	00 e0       	ldi	r16, 0x00	; 0
-     b16:	10 e0       	ldi	r17, 0x00	; 0
+     b0a:	0e 94 ae 02 	call	0x55c	; 0x55c <measure_init>
+     b0e:	88 23       	and	r24, r24
+     b10:	19 f0       	breq	.+6      	; 0xb18 <main+0x3c>
+     b12:	01 e0       	ldi	r16, 0x01	; 1
+     b14:	10 e0       	ldi	r17, 0x00	; 0
+     b16:	02 c0       	rjmp	.+4      	; 0xb1c <main+0x40>
+     b18:	00 e0       	ldi	r16, 0x00	; 0
+     b1a:	10 e0       	ldi	r17, 0x00	; 0
 	
 	//Allow for Interrupts (e.g. for serial communication) 
 	sei(); 
-     b18:	78 94       	sei
+     b1c:	78 94       	sei
 	
 	
 	
 	
 	//Write a message to the serial interface, that the boot-process was successful
 	char str[] = {"OK"}; 
-     b1a:	de 01       	movw	r26, r28
-     b1c:	11 96       	adiw	r26, 0x01	; 1
-     b1e:	e7 e1       	ldi	r30, 0x17	; 23
-     b20:	f1 e0       	ldi	r31, 0x01	; 1
-     b22:	83 e0       	ldi	r24, 0x03	; 3
-     b24:	01 90       	ld	r0, Z+
-     b26:	0d 92       	st	X+, r0
-     b28:	81 50       	subi	r24, 0x01	; 1
-     b2a:	e1 f7       	brne	.-8      	; 0xb24 <main+0x4c>
+     b1e:	de 01       	movw	r26, r28
+     b20:	11 96       	adiw	r26, 0x01	; 1
+     b22:	e7 e1       	ldi	r30, 0x17	; 23
+     b24:	f1 e0       	ldi	r31, 0x01	; 1
+     b26:	83 e0       	ldi	r24, 0x03	; 3
+     b28:	01 90       	ld	r0, Z+
+     b2a:	0d 92       	st	X+, r0
+     b2c:	81 50       	subi	r24, 0x01	; 1
+     b2e:	e1 f7       	brne	.-8      	; 0xb28 <main+0x4c>
 	serial_send_string(str); 
-     b2c:	ce 01       	movw	r24, r28
-     b2e:	01 96       	adiw	r24, 0x01	; 1
-     b30:	0e 94 11 06 	call	0xc22	; 0xc22 <serial_send_string>
+     b30:	ce 01       	movw	r24, r28
+     b32:	01 96       	adiw	r24, 0x01	; 1
+     b34:	0e 94 11 06 	call	0xc22	; 0xc22 <serial_send_string>
 	/************************************************************************/
 	/* MAIN WHILE LOOP                                                      */
 	/************************************************************************/
     while(1) {
 		
 		if(boot_state) {
-     b34:	01 15       	cp	r16, r1
-     b36:	11 05       	cpc	r17, r1
-     b38:	29 f0       	breq	.+10     	; 0xb44 <main+0x6c>
+     b38:	01 15       	cp	r16, r1
+     b3a:	11 05       	cpc	r17, r1
+     b3c:	19 f0       	breq	.+6      	; 0xb44 <main+0x68>
 		
 			//***SEND DATA TO PIXHAWK 
 			//The Pixhawk requests for data by sending commands. These commands are processed in the 
 			//Interrupt routine of the UART. 
 			//The answer to a request is sent when we have time in the pixhawk_handler(). 
 			pixhawk_handler(); 
-     b3a:	0e 94 5f 05 	call	0xabe	; 0xabe <pixhawk_handler>
-		
-		
-			//***MEASUREMENTS WITH THE LIDAR  
-			// 
-			#if DEBUG_MATLAB == 0
-			measure_handler(); 
-     b3e:	0e 94 31 04 	call	0x862	; 0x862 <measure_handler>
-     b42:	f8 cf       	rjmp	.-16     	; 0xb34 <main+0x5c>
+     b3e:	0e 94 5f 05 	call	0xabe	; 0xabe <pixhawk_handler>
+     b42:	fa cf       	rjmp	.-12     	; 0xb38 <main+0x5c>
 			//serial_send_string(buffer);
 		
 		} else {
@@ -2629,7 +2627,7 @@ int main(void) {
 			port_led(true); 
      b44:	81 e0       	ldi	r24, 0x01	; 1
      b46:	0e 94 b2 05 	call	0xb64	; 0xb64 <port_led>
-     b4a:	f4 cf       	rjmp	.-24     	; 0xb34 <main+0x5c>
+     b4a:	f6 cf       	rjmp	.-20     	; 0xb38 <main+0x5c>
 	
 	//Init the use of the Pixhawk 
 	boot_state = boot_state && pixhawk_init();					//DEBUG: add this init ot the bool boot_state
@@ -2638,7 +2636,7 @@ int main(void) {
 	boot_state = boot_state && measure_init(); 
      b4c:	00 e0       	ldi	r16, 0x00	; 0
      b4e:	10 e0       	ldi	r17, 0x00	; 0
-     b50:	e3 cf       	rjmp	.-58     	; 0xb18 <main+0x40>
+     b50:	e5 cf       	rjmp	.-54     	; 0xb1c <main+0x40>
 
 00000b52 <port_init>:
  *

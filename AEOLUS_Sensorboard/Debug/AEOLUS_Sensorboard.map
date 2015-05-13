@@ -282,14 +282,14 @@ LOAD c:/program files (x86)/atmel/atmel studio 6.0/extensions/atmel/avrgcc/3.4.0
                 0x0000079e                mod
                 0x000007d2                push2matrix
                 0x00000862                measure_handler
- .text          0x000008dc      0x1fc pixhawk.o
+ .text          0x000008dc      0x200 pixhawk.o
                 0x000008dc                pixhawk_init
                 0x000008ec                pixhawk_parse
                 0x000009c2                pixhawk_get_heading
                 0x000009cc                send2pixhawk
                 0x00000abe                pixhawk_handler
- .text          0x00000ad8       0x7a main.o
-                0x00000ad8                main
+ .text          0x00000adc       0x76 main.o
+                0x00000adc                main
  .text          0x00000b52       0x5e port.o
                 0x00000b52                port_init
                 0x00000b64                port_led
@@ -683,8 +683,8 @@ LOAD c:/program files (x86)/atmel/atmel studio 6.0/extensions/atmel/avrgcc/3.4.0
  .debug_line    0x0000013e      0x175 I2C.o
  .debug_line    0x000002b3      0x1c9 lidar.o
  .debug_line    0x0000047c      0x17f measure.o
- .debug_line    0x000005fb      0x161 pixhawk.o
- .debug_line    0x0000075c       0x71 main.o
+ .debug_line    0x000005fb      0x162 pixhawk.o
+ .debug_line    0x0000075d       0x70 main.o
  .debug_line    0x000007cd      0x19a port.o
  .debug_line    0x00000967      0x1b2 serial.o
  .debug_line    0x00000b19      0x194 servo.o
