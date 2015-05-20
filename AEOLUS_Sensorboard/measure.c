@@ -84,7 +84,7 @@ bool measure_init(void) {
 	}
 	
 	//Set the initial threshold
-	config.threshold = 20; 
+	config.threshold = 40; 
 	
 	return true; 
 }
@@ -130,9 +130,8 @@ void measure_handler(void) {
 		
 	}
 	
-	
 	//MOVE THE SERVO TO THE NEW ANGLE
-	servo_set(state.angle); 	
+	servo_set(state.angle); 
 
 	//DO THE MEASUREMENT  
 	uint16_t dist = lidar_measure();

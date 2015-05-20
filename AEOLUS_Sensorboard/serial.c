@@ -97,10 +97,11 @@ void serial_send_byte(uint8_t data) {
 
 void serial_send_string(char buf[]) {
 	
+	#if DEBUG_SERIAL == 1
+	//We only send strings to command line, if the DEBUG-Flag is set 
+	
 	uint8_t ind; 
 	ind = 0; 
-	
-	//char buf[] = {"Jonas"}; 
 	
 	while(buf[ind] != 0x00) {
 		serial_send_byte(buf[ind]); 
@@ -109,6 +110,8 @@ void serial_send_string(char buf[]) {
 	  
 	serial_send_byte('\n'); 
 	serial_send_byte(0x0D);	//Send new line 
+	
+	#endif
 	
 }
 
