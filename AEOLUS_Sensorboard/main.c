@@ -92,14 +92,25 @@ int main(void) {
 			measure_handler(); 
 			#endif
 			
-			/*servo_set(0);  //525 was ok
+			//_delay_ms(100);
+			
+			/*servo_set(88);  //525 was ok
 			_delay_ms(1000);
 			_delay_ms(1000);
 			_delay_ms(1000); 
-			servo_set(180); 
+			servo_set(90); 
+			_delay_ms(1000);
+			_delay_ms(1000);
+			_delay_ms(1000);
+			servo_set(92);
+			_delay_ms(1000);
+			_delay_ms(1000);
+			_delay_ms(1000);
+			servo_set(90);
 			_delay_ms(1000);
 			_delay_ms(1000);
 			_delay_ms(1000);*/
+			
 			
 			/*uint8_t i; 
 			for(i=0;i<180;i=i+5) {

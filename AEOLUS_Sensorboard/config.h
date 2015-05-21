@@ -40,6 +40,7 @@
 #define DEBUG_MATLAB 0  //Debugging in Matlab. A measurement Step is only done, when the distance data was transferred (1 == Debugging in Matlab is active) 
 #define DEBUG_FILTER 1  //Turn off preprocessing (filtering) of the obstacles before sending them to the Pixhawk (1 == Filter turned off) 
 #define DEBUG_SERIAL 0  //Turn on the serial debugging by sending messages to a serial terminal (1 == Messages are sent) 
+#define DEBUG_CHEAPSERVO 1 //A cheap servo is used => we use a different Measurement procedure 
 
 
 

@@ -366,7 +366,7 @@ bool send2pixhawk(uint8_t cmd) {
 			break; 
 		}
 		case CMD_DISTMAT1: {
-			//Return the first halfe of the Distance-Matrix 0-179°
+			//Return the first half of the Distance-Matrix 0-179°
 			
 			serial_send_byte(360/INTERVAL); //Number of Bytes 
 			

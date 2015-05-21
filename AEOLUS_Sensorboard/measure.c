@@ -23,7 +23,7 @@ static uint8_t dist_mat[(uint16_t)(360/INTERVAL)];
 static uint16_t last_center; 
 
 static struct {
-	uint16_t angle;		//Current angle to be checked => starboard border is 0°
+	int16_t angle;		//Current angle to be checked => starboard border is 0°
 	int8_t direction;	//Increasing or Decreasing of the angle (starboard --> backboard = 1; backboard --> starboard = -1)
 	uint16_t last_center; //Center angle for which the data in the array is valid 
 	uint16_t curr_center; //Current center known from the Pixhawk 
@@ -52,7 +52,7 @@ CircularBuffer obst_buffer;	//Circular Buffer holding the detected obstacles
 void filter();
 
 /* @brief Store a value in the distance Matrix */ 
-void push2matrix(uint16_t dist); 
+void push2matrix(uint16_t dist, uint16_t angle); 
 
 /* @brief Take the modulo for 360° */
 uint16_t mod(int16_t); 
@@ -76,7 +76,7 @@ bool measure_init(void) {
 	state.direction = 1; 
 	
 	//Initialize the Buffer
-	obst_buffer = buffer_init(MAX_OBSTACLE_NUMBER); 
+	//obst_buffer = buffer_init(MAX_OBSTACLE_NUMBER); 
 	
 	//Init the Distance Matrix with Zero 
 	for(uint16_t i = 0; i<360/INTERVAL; i++) {
@@ -85,6 +85,13 @@ bool measure_init(void) {
 	
 	//Set the initial threshold
 	config.threshold = 40; 
+	
+	
+	#if DEBUG_CHEAPSERVO
+		servo_set(90); 
+		state.angle = 90; 
+	#endif
+	
 	
 	return true; 
 }
@@ -105,13 +112,36 @@ void measure_handler(void) {
 	_delay_ms(500); 
 	*/
 
+	#if DEBUG_CHEAPSERVO == 1
+	
+		if(state.angle >= 2*RANGE) {
+			
+			state.direction = -1;
+			state.angle = 90;  
+			servo_set(state.angle); 
+			_delay_ms(180);  
+		}
+		
+		if(state.angle <= 0) {
+			
+			state.direction = 1; 
+			state.angle = 90;
+			servo_set(state.angle); 
+			_delay_ms(180);  
+		}
+		
+	
+	#else 
 	
 	//Check if we already finished one round 
 	if(state.angle >= 2*RANGE) {
 		//We are at the end => on backbord-side 
-		
-		state.angle = 2*RANGE; 
-		state.direction = -1; 
+		 
+		//state.direction = -1;
+		state.direction = 1; 
+		state.angle = 0;
+		servo_set(0);  
+		port_led_blink(1);  
 		
 		#if(DEBUG_FILTER == 0)
 			filter();		//Filter the data and find the obstacles 
@@ -121,14 +151,16 @@ void measure_handler(void) {
 	if(state.angle <= 0) {
 		//We are at the end => on starboard-side
 		
-		state.angle = 0; 
-		state.direction = 1; 
+		//state.angle = 0; 
+		state.direction = 1;
 		
 		#if(DEBUG_FILTER == 0)
 			filter();		//Filter the data and find the obstacles 
 		#endif
 		
 	}
+	
+	#endif
 	
 	//MOVE THE SERVO TO THE NEW ANGLE
 	servo_set(state.angle); 
@@ -137,7 +169,7 @@ void measure_handler(void) {
 	uint16_t dist = lidar_measure();
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
-	push2matrix(dist); 
+	push2matrix(dist, state.angle); 
 	
 	//Increase the Angle
 	state.angle += (state.direction * INTERVAL);
@@ -150,19 +182,13 @@ void measure_handler(void) {
  * 
  * 
  */
-void push2matrix(uint16_t dist) {
+void push2matrix(uint16_t dist, uint16_t angle_tn) {
 	
 	//CALCULATE ANGLE WRT TRUE NORTH 
-	uint16_t curr_course = pixhawk_get_heading(); 
-	uint16_t angle_tn = state.angle;
-	int16_t alpha = 0; 
-	if(state.angle > RANGE) {
-		//This is minus => to the backboard side of the boat
-	
-		alpha = state.angle - RANGE;
-	
-		angle_tn = mod(curr_course - alpha);
-	}	
+	int16_t curr_course = pixhawk_get_heading(); 
+	curr_course = 20; 
+	//int16_t angle_tn = state.angle;
+	int16_t alpha = 0; 	
 
 	if(state.angle < RANGE) {
 		//This is plus => to the starboard side of the boat
@@ -170,6 +196,14 @@ void push2matrix(uint16_t dist) {
 		alpha = RANGE - state.angle;
 	
 		angle_tn = mod(curr_course + alpha);
+	}
+	
+	if(state.angle > RANGE) {
+		//This is minus => to the backboard side of the boat
+		
+		alpha = state.angle - RANGE;
+			
+		angle_tn = mod(curr_course - alpha);
 	}
 
 	if(state.angle == RANGE) {
@@ -179,22 +213,11 @@ void push2matrix(uint16_t dist) {
 	}
 	
 	
+	
 	//PUSH THE VALUE INTO THE DISTANCE MATRIX 
-	uint16_t index = angle_tn/INTERVAL;		//Index in Distance Matrix 
+	uint16_t index = (float)angle_tn/(float)INTERVAL;		//Index in Distance Matrix 
 	
 	dist_mat[index] = dist;					//Store value in Matrix		
-	
-	
-	//UPDATE MIN AND MAX INDEX VALUES 
-	//This way, the search for obstacles in the correlation matrix can be reduced to the 
-	//effectively written region. 
-	if(index > state.max_tn_angle_ind) {
-		state.max_tn_angle_ind = index; 
-	}		
-	
-	if(index < state.min_tn_angle_ind) {
-		state.min_tn_angle_ind = index; 
-	}
 }	
 
 

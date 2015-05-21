@@ -19,8 +19,8 @@
 #define ServoSpeed 2     //Speed of the Servo [ms/°]
 
 
-#define minPWM 575		//575
-#define maxPWM 2375  	//without LIDAR: 2348, with LIDAR: 2375
+#define minPWM 575	//575 (650 was ok) 
+#define maxPWM 2350 	//without LIDAR: 2348, with LIDAR: 2375
 
 static struct {
 	uint16_t angle; 
@@ -87,14 +87,14 @@ bool servo_init(void) {
 void servo_set(float deg) {
     
 	//Calculate the PWM Signal 
-	uint16_t pwm = ((maxPWM-minPWM)/ServoRange*deg + minPWM);
+	uint16_t pwm = (((float)((float)maxPWM-(float)minPWM))/(float)ServoRange*(float)deg + (float)minPWM);
 	
 	//Time for moving to this position 
 	int16_t ang_diff = state.angle-deg; 
 	if(ang_diff < 0) {
 		ang_diff = -ang_diff; 
 	}
-	uint16_t time = ang_diff/ServoSpeed;	
+	uint16_t time = (float)ang_diff/(float)ServoSpeed;	
 	
 	//Store the angle locally
 	state.angle = deg;
