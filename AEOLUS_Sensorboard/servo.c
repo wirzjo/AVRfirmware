@@ -16,7 +16,7 @@
 #include "servo.h"
 
 #define ServoRange 180   //Number of Degrees from fully left to fully right [°]
-#define ServoSpeed 20     //Speed of the Servo [ms/°]
+#define ServoSpeed 2    //Speed of the Servo [ms/°]
 
 
 #define minPWM 575	//575 (650 was ok) 
@@ -73,6 +73,7 @@ bool servo_init(void) {
 	_delay_ms(1000);
 	OCR1A = ICR1 - maxPWM; */
 	
+	state.angle = 0; 
 	
 	return true; 
 }
@@ -94,7 +95,7 @@ void servo_set(float deg) {
 	if(ang_diff < 0) {
 		ang_diff = -ang_diff; 
 	}
-	uint16_t time = (float)ang_diff/(float)ServoSpeed;	
+	uint16_t time = (float)ang_diff*(float)ServoSpeed;	
 	
 	//Store the angle locally
 	state.angle = deg;

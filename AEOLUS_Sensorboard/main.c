@@ -50,16 +50,16 @@ int main(void) {
 	boot_state = boot_state && servo_init(); 
 	
 	//Init the use of the LIDAR 
-	boot_state = boot_state && lidar_init();     //DEBUG: Remove true, this is only, because no lidar is present by now 
+	//boot_state = boot_state && lidar_init();     //DEBUG: Remove true, this is only, because no lidar is present by now 
 	
 	//Init the use of the Pixhawk 
-	boot_state = boot_state && pixhawk_init();					//DEBUG: add this init ot the bool boot_state
+	//boot_state = boot_state && pixhawk_init();					//DEBUG: add this init ot the bool boot_state
 	
 	//Init the measurement 
 	boot_state = boot_state && measure_init(); 
 	
 	//Allow for Interrupts (e.g. for serial communication) 
-	sei(); 
+	//sei(); 
 	
 	
 	
@@ -82,7 +82,7 @@ int main(void) {
 			//The Pixhawk requests for data by sending commands. These commands are processed in the 
 			//Interrupt routine of the UART. 
 			//The answer to a request is sent when we have time in the pixhawk_handler(). 
-			pixhawk_handler(); 
+			//pixhawk_handler(); 
 		
 		
 			//***MEASUREMENTS WITH THE LIDAR  
@@ -90,6 +90,8 @@ int main(void) {
 			#if DEBUG_MATLAB == 0
 			measure_handler(); 
 			#endif
+			
+			//_delay_ms(500); 
 			
 			//_delay_ms(100);
 			

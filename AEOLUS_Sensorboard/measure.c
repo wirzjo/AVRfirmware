@@ -132,7 +132,7 @@ void measure_handler(void) {
 			_delay_ms(180);   
 			
 			//We set the Heading of the Boat 
-			head_valid = pixhawk_get_heading(); 
+			//head_valid = pixhawk_get_heading(); 
 		}
 		
 		if(state.angle <= 0) {
@@ -173,11 +173,11 @@ void measure_handler(void) {
 	servo_set(state.angle); 
 
 	//DO THE MEASUREMENT  
-	uint16_t dist = lidar_measure();
+	//uint16_t dist = lidar_measure();
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
-	push2matrix(dist, state.angle); 
-	push2matrix_small(dist); 
+	//push2matrix(dist, state.angle); 
+	//push2matrix_small(dist); 
 	
 	//Increase the Angle
 	state.angle += (state.direction * INTERVAL);
