@@ -24,6 +24,12 @@ bool measure_get_obstacles(uint16_t *angle, uint16_t *dist);
 /* @brief Return the distance at a given Angle */ 
 uint16_t measure_get_distance(uint16_t angle); 
 
+/* @brief Return the distance at a given Angle from the small Matrix*/ 
+uint16_t measure_get_distance_small(uint16_t ind);
+
+/* @brief Return the heading for which the small distance Matrix is valid */ 
+uint16_t measure_get_heading_valid(void);
+
 /* @brief Set the threshold for the obstacle Detction */ 
 bool measure_set_threshold(uint16_t threshold); 
 

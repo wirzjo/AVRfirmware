@@ -71,7 +71,8 @@ static bool flag_send = false;
 #define CMD_NUMOFSTACLES 0x4E   //Number of obstacles currently in range 
 #define CMD_LASTDIST    0x4A    //Latest known distance from the LIDAR
 #define CMD_DISTMAT1    0x4B    //Return the distance Matrix for 0-179 
-#define CMD_DISTMAT2    0x4C    //Return the distance Matrix for 180-355	
+#define CMD_DISTMAT2    0x4C    //Return the distance Matrix for 180-355
+#define CMD_DISTMATSMALL 0x4D   //Return the distance Matrix for -RANGE to RANGE centered at the last known Boat-Heading	
 #define CMD_RESET       0x20    //Reset the Sensor to initial conditions 
 
 #define CMD_SET_THRESH  0x30    //Set the threshold for the obstacle Detection  
@@ -390,6 +391,27 @@ bool send2pixhawk(uint8_t cmd) {
 			}
 			
 			break;
+		}
+		case CMD_DISTMATSMALL: {
+			//Return the Distances from -RANGE to RANGE, centered at the last known boat-heading
+			//NOTE: The first two bytes are the heading of the boat! 
+			
+			//Number of Bytes (Distances plus 2bytes for heading) 
+			serial_send_byte(2*RANGE/INTERVAL*2 + 2); 
+			
+			//Heading for which the measurements are valid 
+			uint16_t heading_valid = measure_get_heading_valid(); 
+			serial_send_byte((uint8_t)(heading_valid>>8));
+			serial_send_byte((uint8_t)(heading_valid));
+			
+			//The distances stored in the matrix 
+			for(uint16_t ind = 0; ind < 2*RANGE/INTERVAL; ind++) {
+				uint16_t dist = measure_get_distance_small(ind);
+				serial_send_byte((uint8_t)(dist>>8));
+				serial_send_byte((uint8_t)(dist));
+			}
+			
+			break; 
 		}
 		default: {
 			//An invalid command was sent => might flag unhappy...

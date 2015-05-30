@@ -22,8 +22,13 @@ static uint8_t dist_mat[(uint16_t)(360/INTERVAL)];
 //static uint16_t head_mat[(uint16_t)(360/INTERVAL)]; 
 static uint16_t last_center; 
 
+//Small Version of the Distance Matrix, only the Measurements currently done are stored 
+static uint16_t dist_mat_small[2*RANGE/INTERVAL]; 
+static uint16_t head_valid; 
+
+
 static struct {
-	int16_t angle;		//Current angle to be checked => starboard border is 0°
+	uint16_t angle;		//Current angle to be checked => starboard border is 0°
 	int8_t direction;	//Increasing or Decreasing of the angle (starboard --> backboard = 1; backboard --> starboard = -1)
 	uint16_t last_center; //Center angle for which the data in the array is valid 
 	uint16_t curr_center; //Current center known from the Pixhawk 
@@ -53,6 +58,9 @@ void filter();
 
 /* @brief Store a value in the distance Matrix */ 
 void push2matrix(uint16_t dist, uint16_t angle); 
+
+/* @brief Store a value in the small distance Matrix */ 
+void push2matrix_small(uint16_t dist); 
 
 /* @brief Take the modulo for 360° */
 uint16_t mod(int16_t); 
@@ -116,49 +124,48 @@ void measure_handler(void) {
 	
 		if(state.angle >= 2*RANGE) {
 			
+			_delay_ms(100);
+			
 			state.direction = -1;
 			state.angle = 90;  
 			servo_set(state.angle); 
-			_delay_ms(180);  
+			_delay_ms(180);   
+			
+			//We set the Heading of the Boat 
+			head_valid = pixhawk_get_heading(); 
 		}
 		
 		if(state.angle <= 0) {
 			
+			_delay_ms(100);
+			
 			state.direction = 1; 
 			state.angle = 90;
 			servo_set(state.angle); 
-			_delay_ms(180);  
+			_delay_ms(180); 
+  
 		}
 		
 	
 	#else 
 	
-	//Check if we already finished one round 
-	if(state.angle >= 2*RANGE) {
-		//We are at the end => on backbord-side 
+		//Check if we already finished one round 
+		if(state.angle >= 2*RANGE) {
+			//We are at the end => on backbord-side 
 		 
-		//state.direction = -1;
-		state.direction = 1; 
-		state.angle = 0;
-		servo_set(0);  
-		port_led_blink(1);  
-		
-		#if(DEBUG_FILTER == 0)
-			filter();		//Filter the data and find the obstacles 
-		#endif
-	}
+			//state.direction = -1;
+			state.direction = 1; 
+			state.angle = 0;
+			servo_set(0);  
+			port_led_blink(1);  
+		}
 	
-	if(state.angle <= 0) {
-		//We are at the end => on starboard-side
+		if(state.angle <= 0) {
+			//We are at the end => on starboard-side
 		
-		//state.angle = 0; 
-		state.direction = 1;
-		
-		#if(DEBUG_FILTER == 0)
-			filter();		//Filter the data and find the obstacles 
-		#endif
-		
-	}
+			//state.angle = 0; 
+			state.direction = 1;	
+		}
 	
 	#endif
 	
@@ -170,6 +177,7 @@ void measure_handler(void) {
 	
 	//TELL THE VALUE TO THE FILTER-UNIT
 	push2matrix(dist, state.angle); 
+	push2matrix_small(dist); 
 	
 	//Increase the Angle
 	state.angle += (state.direction * INTERVAL);
@@ -218,7 +226,41 @@ void push2matrix(uint16_t dist, uint16_t angle_tn) {
 	uint16_t index = (float)angle_tn/(float)INTERVAL;		//Index in Distance Matrix 
 	
 	dist_mat[index] = dist;					//Store value in Matrix		
+}
+
+
+/**
+ * Store the measurement in a Matrix (small Matrix) 
+ * 
+ */
+void push2matrix_small(uint16_t dist) {
+	
+	uint16_t ind = state.angle/INTERVAL; 
+	
+	dist_mat_small[ind] = dist; 
+	
 }	
+
+
+/**
+ * Get the values stored in the small Matrix 
+ *
+ */
+uint16_t measure_get_distance_small(uint16_t ind) {
+	
+	return dist_mat_small[ind]; 
+	
+}
+
+/**
+ * Get the heading for which the small distance matrix is valid 
+ *
+ */
+uint16_t measure_get_heading_valid(void) {
+	
+	return head_valid; 
+	
+}
 
 
 void filter(void) {

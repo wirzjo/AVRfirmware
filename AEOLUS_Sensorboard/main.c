@@ -63,7 +63,6 @@ int main(void) {
 	
 	
 	
-	
 	//Write a message to the serial interface, that the boot-process was successful
 	char str[] = {"OK"}; 
 	serial_send_string(str); 
@@ -94,19 +93,11 @@ int main(void) {
 			
 			//_delay_ms(100);
 			
-			/*servo_set(88);  //525 was ok
+			/*servo_set(90);  //525 was ok
 			_delay_ms(1000);
 			_delay_ms(1000);
 			_delay_ms(1000); 
-			servo_set(90); 
-			_delay_ms(1000);
-			_delay_ms(1000);
-			_delay_ms(1000);
-			servo_set(92);
-			_delay_ms(1000);
-			_delay_ms(1000);
-			_delay_ms(1000);
-			servo_set(90);
+			servo_set(180); 
 			_delay_ms(1000);
 			_delay_ms(1000);
 			_delay_ms(1000);*/

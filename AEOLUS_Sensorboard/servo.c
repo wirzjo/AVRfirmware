@@ -16,7 +16,7 @@
 #include "servo.h"
 
 #define ServoRange 180   //Number of Degrees from fully left to fully right [°]
-#define ServoSpeed 2     //Speed of the Servo [ms/°]
+#define ServoSpeed 20     //Speed of the Servo [ms/°]
 
 
 #define minPWM 575	//575 (650 was ok) 
@@ -87,7 +87,7 @@ bool servo_init(void) {
 void servo_set(float deg) {
     
 	//Calculate the PWM Signal 
-	uint16_t pwm = (((float)((float)maxPWM-(float)minPWM))/(float)ServoRange*(float)deg + (float)minPWM);
+	uint16_t pwm = (((float)((float)maxPWM-(float)minPWM))/(float)ServoRange*deg + (float)minPWM);
 	
 	//Time for moving to this position 
 	int16_t ang_diff = state.angle-deg; 
